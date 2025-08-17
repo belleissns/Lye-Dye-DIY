@@ -1,12 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lye Dye DIY - Soap Calculator</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bel Lei's Soap Calculator</title>
+
+  <!-- PWA manifest -->
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#6b4e71" />
+
+  <!-- iOS support -->
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #faf8f5;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      color: #6b4e71;
+    }
+    button {
+      padding: 10px 15px;
+      margin: 5px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      background: #6b4e71;
+      color: #fff;
+    }
+  </style>
 </head>
 <body>
-  <h1>Welcome to Lye Dye DIY!</h1>
-  <p>Your soap calculator app is live 🚀</p>
+  <h1>🧼 Bel Lei's Soap Calculator</h1>
+  <p>Welcome! This is the test app version.</p>
+
+  <button onclick="alert('Feature coming soon!')">Try Calculator</button>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').then(() => {
+        console.log("✅ Service Worker registered");
+      });
+    }
+  </script>
 </body>
 </html>
