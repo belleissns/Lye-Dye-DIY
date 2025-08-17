@@ -1,12 +1,11 @@
 {
   "name": "Lye, Dye, and DIY",
-  "short_name": "LyeDyeDIY",
-  "description": "A soap maker's dream calculator & toolkit by Bel Lei's Soaps N Stuffs.",
-  "start_url": ".",
+  "short_name": "SoapCalc",
+  "description": "A soap batch calculator with safety checks for lye and pot capacity.",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#c49fdd",
-  "orientation": "portrait",
+  "background_color": "#fafafa",
+  "theme_color": "#4CAF50",
   "icons": [
     {
       "src": "icons/icon-192.png",
