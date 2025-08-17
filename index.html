@@ -5,148 +5,126 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lye, Dye, and DIY - Soap Calculator</title>
 
-  <!-- App Icons & Manifest -->
+  <!-- PWA / Icons -->
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
   <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png" />
+  <meta name="theme-color" content="#4CAF50" />
 
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #fafafa;
-      margin: 0;
-      padding: 20px;
-      text-align: center;
-    }
-    h1 {
-      color: #444;
-      margin-bottom: 10px;
-    }
-    form {
-      background: #fff;
-      padding: 15px;
-      border-radius: 10px;
-      max-width: 500px;
-      margin: auto;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-    label {
-      display: block;
-      text-align: left;
-      margin-top: 10px;
-      font-weight: bold;
-    }
-    input, select {
-      width: 95%;
-      padding: 8px;
-      margin-top: 5px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    button {
-      background: #4CAF50;
-      color: white;
-      padding: 10px 20px;
-      margin-top: 15px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-    button:hover {
-      background: #45a049;
-    }
-    .results {
-      margin-top: 20px;
-      background: #f9f9f9;
-      padding: 15px;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-      max-width: 500px;
-      margin-left: auto;
-      margin-right: auto;
-      text-align: left;
-    }
-    .warning {
-      color: red;
-      font-weight: bold;
-      margin-top: 15px;
-    }
+    :root { --card:#ffffff; --bg:#fafafa; --text:#333; --shadow:0 2px 6px rgba(0,0,0,.08); }
+    body { font-family: Arial, sans-serif; margin:0; padding:20px; background:var(--bg); color:var(--text); text-align:center; }
+    h1 { margin: 0 0 4px; }
+    h2 { margin: 0 0 18px; font-weight: 500; color:#444; }
+    form { background:var(--card); padding:20px; border-radius:14px; box-shadow:var(--shadow); max-width:420px; margin:18px auto; text-align:left; }
+    label { display:block; margin-top:12px; font-weight:700; }
+    input { width:100%; padding:12px; margin-top:6px; border-radius:10px; border:1px solid #dcdcdc; font-size:16px; box-sizing:border-box; }
+    button { width:100%; padding:12px; margin-top:18px; font-size:18px; background:#4CAF50; color:#fff; border:none; border-radius:10px; cursor:pointer; }
+    button:hover { background:#409f47; }
+    .results { background:#fff; box-shadow:var(--shadow); border-radius:14px; padding:16px; max-width:420px; margin:18px auto; text-align:left; display:none; }
+    .row { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px dashed #eee; }
+    .row:last-child { border-bottom:none; }
+    .ok { color:#2e7d32; font-weight:700; }
+    .warn { color:#e65100; font-weight:700; }
+    .danger { color:#c62828; font-weight:700; }
+    .note { max-width:520px; margin:10px auto; color:#c62828; font-weight:700; }
+    footer { margin-top:18px; color:#777; font-size:13px; }
   </style>
 </head>
-  <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .then(() => console.log('✅ Service worker registered'))
-        .catch(err => console.error('SW registration failed:', err));
-    });
-  }
-  </script>
 <body>
   <h1>Lye, Dye, and DIY</h1>
-  <h3>Soap Batch Calculator</h3>
+  <h2>Beginner-Friendly Soap Batch Calculator</h2>
 
   <form id="calcForm">
-    <label for="oilWeight">Total Oil Weight (grams):</label>
-    <input type="number" id="oilWeight" required />
+    <label>Total Oil Weight (grams):</label>
+    <input type="number" id="oilWeight" inputmode="decimal" placeholder="e.g., 1000" required />
 
-    <label for="lyeDiscount">Lye Discount (%):</label>
+    <label>Lye Discount / Superfat (%):</label>
     <input type="number" id="lyeDiscount" value="5" min="0" max="15" />
 
-    <label for="waterRatio">Water-to-Lye Ratio:</label>
+    <label>Water-to-Lye Ratio:</label>
     <input type="number" id="waterRatio" step="0.1" value="2.5" />
 
-    <label for="potSize">Pot / Crockpot Capacity (mL):</label>
-    <input type="number" id="potSize" />
-
+    <label>Pot / Crockpot Capacity (mL):</label>
+    <input type="number" id="potCapacity" placeholder="optional, for safety check" />
     <button type="submit">Calculate</button>
   </form>
 
-  <div class="results" id="results"></div>
-
-  <div class="warning">
-    ⚠️ Safety Note: Always keep your fill level around 60–75% of crockpot capacity to prevent overflow.
+  <div class="results" id="resultsBox">
+    <h3>Batch Results</h3>
+    <div class="row"><span>NaOH (Lye) Needed</span><strong><span id="lyeNeeded"></span> g</strong></div>
+    <div class="row"><span>Water Needed</span><strong><span id="waterNeeded"></span> g</strong></div>
+    <div class="row"><span>Total Batch Weight</span><strong><span id="totalBatch"></span> g</strong></div>
+    <div class="row"><span>Recommended Pot Fill (60–75%)</span><strong><span id="potFill"></span></strong></div>
+    <div class="row"><span>Capacity Status</span><strong id="capStatus"></strong></div>
   </div>
 
+  <p class="note">⚠️ Safety: keep your fill level around <b>60–75%</b> of pot capacity to prevent overflow.</p>
+
+  <footer>© 2025 Bel Lei’s Soaps N Stuffs • Lye, Dye, and DIY</footer>
+
+  <!-- Calculator logic + SW registration -->
   <script>
-    document.getElementById("calcForm").addEventListener("submit", function(event) {
-      event.preventDefault();
+    // Beginner-friendly math (single average SAP for demo): NaOH ≈ 0.134 g per g oils
+    // In the full app we’ll switch to per-oil SAPs; this keeps the demo safe & simple.
+    const SAP_NAOH_AVG = 0.134;
 
-      const oilWeight = parseFloat(document.getElementById("oilWeight").value);
-      const lyeDiscount = parseFloat(document.getElementById("lyeDiscount").value);
-      const waterRatio = parseFloat(document.getElementById("waterRatio").value);
-      const potSize = parseFloat(document.getElementById("potSize").value);
+    document.getElementById('calcForm').addEventListener('submit', function (e) {
+      e.preventDefault();
 
-      // Example: rough NaOH usage (0.134 * oils)
-      let lyeNeeded = oilWeight * 0.134;
-      let discount = (lyeDiscount / 100) * lyeNeeded;
-      let finalLye = lyeNeeded - discount;
-      let waterNeeded = finalLye * waterRatio;
+      const oils = parseFloat(document.getElementById('oilWeight').value);
+      const sf   = parseFloat(document.getElementById('lyeDiscount').value) || 0;
+      const r    = parseFloat(document.getElementById('waterRatio').value)  || 2.5;
+      const pot  = parseFloat(document.getElementById('potCapacity').value);
 
-      let batchVolume = oilWeight + waterNeeded + finalLye;
+      if (isNaN(oils) || oils <= 0) { alert('Enter a valid total oil weight.'); return; }
 
-      let html = `
-        <h4>Results</h4>
-        <p>Oils: ${oilWeight.toFixed(1)} g</p>
-        <p>Lye (NaOH): ${finalLye.toFixed(1)} g</p>
-        <p>Water: ${waterNeeded.toFixed(1)} g</p>
-        <p><strong>Total Batch Weight:</strong> ${batchVolume.toFixed(1)} g</p>
-      `;
+      // Raw NaOH then apply superfat (lye discount)
+      let lyeRaw = oils * SAP_NAOH_AVG;
+      let lye    = lyeRaw * (1 - (sf / 100));
 
-      if (potSize && potSize > 0) {
-        let safeMax = potSize * 0.75;
-        html += `<p><strong>Pot Size:</strong> ${potSize} mL</p>`;
-        html += `<p><strong>Recommended Max Batch:</strong> ${safeMax.toFixed(0)} g (75% safety fill)</p>`;
-        if (batchVolume > safeMax) {
-          html += `<p style="color:red"><b>⚠️ Warning:</b> This batch may overflow your pot!</p>`;
-        } else {
-          html += `<p style="color:green"><b>✓ Safe:</b> Batch fits within recommended safety range.</p>`;
-        }
+      // Water by ratio to lye
+      let water  = lye * r;
+
+      // Total batch (g) — good proxy for mL for capacity check
+      let total  = oils + lye + water;
+
+      // Write results
+      document.getElementById('lyeNeeded').textContent   = lye.toFixed(2);
+      document.getElementById('waterNeeded').textContent = water.toFixed(2);
+      document.getElementById('totalBatch').textContent  = total.toFixed(2);
+
+      // Capacity advisory
+      let status = '—';
+      let fillTxt = 'N/A';
+      if (!isNaN(pot) && pot > 0) {
+        const min = pot * 0.60, max = pot * 0.75;
+        fillTxt = `${min.toFixed(0)} g – ${max.toFixed(0)} g`;
+
+        if (total <= max) status = '✓ Safe';                // green
+        else if (total <= pot) status = '⚠️ High (reduce)'; // yellow
+        else status = '🚫 Overflow risk';                    // red
       }
+      document.getElementById('potFill').textContent = fillTxt;
 
-      document.getElementById("results").innerHTML = html;
+      const capEl = document.getElementById('capStatus');
+      capEl.textContent = status;
+      capEl.className = '';
+      if (status.startsWith('✓')) capEl.classList.add('ok');
+      else if (status.startsWith('⚠️')) capEl.classList.add('warn');
+      else if (status.startsWith('🚫')) capEl.classList.add('danger');
+
+      document.getElementById('resultsBox').style.display = 'block';
     });
+
+    // PWA service worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(() => console.log('✅ Service worker registered'))
+          .catch(err => console.error('SW registration failed:', err));
+      });
+    }
   </script>
 </body>
 </html>
