@@ -1,331 +1,378 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Lye, Dye, and DIY — Advanced Soap Calculator</title>
-
-  <!-- PWA / Icons -->
-  <link rel="manifest" href="manifest.json"/>
-  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png"/>
-  <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png"/>
-  <meta name="theme-color" content="#4CAF50"/>
-
-  <style>
-    :root{--bg:#fafafa;--card:#fff;--ink:#222;--muted:#666;--brand:#4CAF50;--warn:#e65100;--danger:#c62828;--ok:#2e7d32;--sh:0 2px 8px rgba(0,0,0,.08)}
-    *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink)}
-    header{padding:22px 16px;text-align:center}
-    h1{margin:.1rem 0 0;font-size:28px}
-    h2{margin:.3rem 0 0;color:var(--muted);font-size:16px;font-weight:500}
-    main{max-width:980px;margin:0 auto;padding:0 16px 40px;display:grid;gap:16px}
-    .card{background:var(--card);border-radius:14px;box-shadow:var(--sh);padding:16px}
-    .grid{display:grid;gap:12px}
-    @media(min-width:900px){.grid-2{grid-template-columns:1fr 1fr}}
-    label{font-weight:600}
-    input,select{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:10px;font-size:16px}
-    .row{display:grid;grid-template-columns:1.4fr .9fr auto;gap:8px}
-    .btn{appearance:none;border:0;border-radius:10px;background:var(--brand);color:#fff;padding:10px 14px;font-weight:700;cursor:pointer}
-    .btn.subtle{background:#eee;color:#222}
-    .btn.danger{background:var(--danger)}
-    .mini{font-size:12px;color:var(--muted)}
-    table{width:100%;border-collapse:separate;border-spacing:0 8px}
-    th,td{padding:6px 8px;text-align:left}
-    .results h3{margin-top:0}
-    .badge{font-weight:800}
-    .ok{color:var(--ok)} .warn{color:var(--warn)} .danger{color:var(--danger)}
-    .kvs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace}
-    footer{max-width:980px;margin:16px auto;padding:0 16px;color:#777;font-size:13px}
-    .hr{height:1px;background:#efefef;margin:12px 0}
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lye, Dye, and DIY — Advanced Soap Calculator</title>
+<link rel="manifest" href="manifest.json"/>
+<link rel="icon" sizes="192x192" href="icons/icon-192.png"/>
+<link rel="icon" sizes="512x512" href="icons/icon-512.png"/>
+<meta name="theme-color" content="#4CAF50"/>
+<style>
+:root{--bg:#fafafa;--card:#fff;--ink:#222;--muted:#666;--brand:#4CAF50;--ok:#2e7d32;--warn:#e65100;--danger:#c62828;--sh:0 2px 8px rgba(0,0,0,.08)}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+header{padding:22px 16px;text-align:center}
+h1{margin:.1rem 0 0;font-size:28px} h2{margin:.3rem 0 0;color:var(--muted);font-size:16px;font-weight:500}
+main{max-width:1024px;margin:0 auto;padding:0 16px 40px;display:grid;gap:16px}
+.card{background:var(--card);border-radius:14px;box-shadow:var(--sh);padding:16px}
+.grid{display:grid;gap:12px} .grid-2{grid-template-columns:1fr 1fr}
+@media(min-width:920px){.grid-2{display:grid}}
+label{font-weight:700}
+input,select{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:10px;font-size:16px}
+table{width:100%;border-collapse:separate;border-spacing:0 8px}
+th,td{padding:6px 8px;text-align:left}
+.btn{appearance:none;border:0;border-radius:10px;background:var(--brand);color:#fff;padding:10px 14px;font-weight:700;cursor:pointer}
+.btn.subtle{background:#eee;color:#222} .btn.danger{background:var(--danger)}
+.mini{font-size:12px;color:var(--muted)} .mono{font-family:ui-monospace,Consolas,Menlo,monospace}
+.hr{height:1px;background:#efefef;margin:12px 0}
+.badge{font-weight:800} .ok{color:var(--ok)} .warn{color:var(--warn)} .danger{color:var(--danger)}
+.kvs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.warnline{padding:8px;border-radius:10px;background:#fff7e6;border:1px solid #ffd699}
+.dangerline{padding:8px;border-radius:10px;background:#ffecec;border:1px solid #ffb3b3}
+footer{max-width:1024px;margin:16px auto;padding:0 16px;color:#777;font-size:13px;text-align:center}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+</style>
 </head>
 <body>
-  <header>
-    <h1>Lye, Dye, and DIY</h1>
-    <h2>Advanced, beginner-friendly soap calculator (Bel Lei’s Soaps N Stuffs)</h2>
-  </header>
+<header>
+  <h1>Lye, Dye, and DIY</h1>
+  <h2>Advanced, beginner-friendly soap calculator • Bel Lei’s Soaps N Stuffs</h2>
+</header>
 
-  <main>
-    <!-- FORM LEFT -->
-    <section class="card grid">
-      <h3>Oils & Base Settings</h3>
+<main>
+  <!-- LEFT: Inputs -->
+  <section class="card grid">
+    <h3>Oils & Base Settings</h3>
+    <div>
+      <table>
+        <thead><tr><th>Oil</th><th style="width:30%">Weight (g)</th><th style="width:20%">Remove</th></tr></thead>
+        <tbody id="oilTbody"></tbody>
+      </table>
+      <button class="btn subtle" id="addOilBtn" type="button">+ Add oil</button>
+      <div class="mini">Enter oil weights in grams. Ounces are shown in results.</div>
+    </div>
 
-      <!-- Oils table -->
-      <div>
-        <table id="oilTable">
-          <thead>
-            <tr>
-              <th style="width:50%">Oil</th>
-              <th style="width:25%">Weight (g)</th>
-              <th style="width:25%">Remove</th>
-            </tr>
-          </thead>
-          <tbody id="oilTbody"></tbody>
-        </table>
-        <button class="btn subtle" id="addOilBtn" type="button">+ Add oil</button>
-        <div class="mini">Tip: enter weights in grams. Ounces will be shown in results.</div>
+    <div class="grid grid-2">
+      <div class="card grid">
+        <label for="lyeType">Lye Type</label>
+        <select id="lyeType">
+          <option value="NaOH">NaOH (bar soap)</option>
+          <option value="KOH">KOH (liquid/cream soap)</option>
+        </select>
+        <label for="lyePurity">Lye Purity (%)</label>
+        <input type="number" id="lyePurity" value="100" min="80" max="100"/>
+        <label for="superfat">Superfat / Lye Discount (%)</label>
+        <input type="number" id="superfat" value="5" min="0" max="15"/>
       </div>
 
-      <!-- Lye & water -->
-      <div class="grid grid-2">
-        <div class="card grid">
-          <label for="lyeType">Lye Type</label>
-          <select id="lyeType">
-            <option value="NaOH">NaOH (bar soap)</option>
-            <option value="KOH">KOH (liquid/cream soap)</option>
-          </select>
-
-          <label for="lyePurity">Lye Purity (%)</label>
-          <input type="number" id="lyePurity" value="100" min="80" max="100"/>
-
-          <label for="superfat">Superfat / Lye Discount (%)</label>
-          <input type="number" id="superfat" value="5" min="0" max="15"/>
+      <div class="card grid">
+        <label>Water Mode</label>
+        <select id="waterMode">
+          <option value="ratio">Water : Lye ratio</option>
+          <option value="conc">Lye solution concentration %</option>
+        </select>
+        <div id="waterRatioWrap">
+          <label for="waterRatio">Water : Lye</label>
+          <input type="number" id="waterRatio" value="2.5" step="0.1"/>
         </div>
-
-        <div class="card grid">
-          <label>Water Mode</label>
-          <select id="waterMode">
-            <option value="ratio">Water : Lye ratio</option>
-            <option value="conc">Lye solution concentration %</option>
-          </select>
-
-          <div id="waterRatioWrap">
-            <label for="waterRatio">Water : Lye</label>
-            <input type="number" id="waterRatio" value="2.5" step="0.1"/>
-          </div>
-
-          <div id="waterConcWrap" style="display:none">
-            <label for="lyeConc">Lye concentration (%)</label>
-            <input type="number" id="lyeConc" value="30" min="20" max="50" step="1"/>
-            <div class="mini">Common range 28–33% for CP; higher = less water.</div>
-          </div>
+        <div id="waterConcWrap" style="display:none">
+          <label for="lyeConc">Lye concentration (%)</label>
+          <input type="number" id="lyeConc" value="30" min="20" max="50" step="1"/>
+          <div class="mini">Common CP range 28–33% (higher = less water).</div>
         </div>
       </div>
+    </div>
 
-      <!-- Additives & FO -->
-      <div class="grid grid-2">
-        <div class="card grid">
-          <h4 style="margin:0">Additives (as % of oils)</h4>
-          <label for="saltPct">Salt % (optional)</label>
-          <input type="number" id="saltPct" placeholder="e.g., 1 (typical 0–3%)"/>
-          <label for="sugarPct">Sugar % (optional)</label>
-          <input type="number" id="sugarPct" placeholder="e.g., 1 (typical 0–3%)"/>
-          <label for="clayPct">Clays total % (optional)</label>
-          <input type="number" id="clayPct" placeholder="e.g., 1 (typical 0–2%)"/>
-        </div>
-
-        <div class="card grid">
-          <h4 style="margin:0">Fragrance / EO</h4>
-          <label for="fragPct">% of oils</label>
-          <input type="number" id="fragPct" value="3" step="0.1"/>
-          <div class="mini">General guideline 2–5% of oils. Always verify IFRA for your specific FO/EO.</div>
-
-          <label for="potCapacity">Pot / Crockpot capacity (mL) — safety</label>
-          <input type="number" id="potCapacity" placeholder="optional"/>
-        </div>
+    <!-- ADDITIVES -->
+    <div class="grid grid-2">
+      <div class="card grid">
+        <h4 style="margin:0">Additives (% of oils unless noted)</h4>
+        <label for="foPct">Fragrance / EO %</label>
+        <input type="number" id="foPct" value="3" step="0.1"/>
+        <label for="lactatePct">Sodium Lactate % (water)</label>
+        <input type="number" id="lactatePct" placeholder="e.g., 2 (typical 1–3%)"/>
+        <label for="saltPct">Salt %</label>
+        <input type="number" id="saltPct" placeholder="0–3%"/>
+        <label for="sugarPct">Sugar %</label>
+        <input type="number" id="sugarPct" placeholder="0–3%"/>
+        <label for="clayPct">Clays total %</label>
+        <input type="number" id="clayPct" placeholder="0–2%"/>
+        <label for="honeyPct">Honey %</label>
+        <input type="number" id="honeyPct" placeholder="0–3% (watch heat)"/>
+        <label for="charcoalPct">Activated Charcoal %</label>
+        <input type="number" id="charcoalPct" placeholder="0–1%"/>
+        <label for="citratePct">Sodium Citrate % (chelator)</label>
+        <input type="number" id="citratePct" placeholder="0–1%"/>
       </div>
 
+      <div class="card grid">
+        <h4 style="margin:0">Colorants & Botanicals (tsp PPO)</h4>
+        <label for="colorTsp">Colorant tsp per pound of oils (PPO)</label>
+        <input type="number" id="colorTsp" placeholder="e.g., 1.0"/>
+        <label for="botTsp">Botanicals tsp PPO</label>
+        <input type="number" id="botTsp" placeholder="e.g., 0.5"/>
+        <h4 style="margin:8px 0 0">Milk Replacement</h4>
+        <label for="milkPct">Replace water with milk (%)</label>
+        <input type="number" id="milkPct" value="0" min="0" max="100"/>
+        <div class="mini">If using milk: freeze to slush, add lye gradually while keeping < 86°F to avoid scorching.</div>
+      </div>
+    </div>
+
+    <div class="tools">
+      <label style="align-self:center">Pot / Crockpot capacity (mL):</label>
+      <input style="max-width:200px" type="number" id="potCapacity" placeholder="optional"/>
       <button class="btn" id="calcBtn" type="button">Calculate</button>
-    </section>
+      <button class="btn subtle" id="printBtn" type="button">Print Recipe</button>
+      <button class="btn subtle" id="exportBtn" type="button">Export JSON</button>
+    </div>
+  </section>
 
-    <!-- RESULTS RIGHT -->
-    <section class="card results" id="results" style="display:none">
-      <h3>Results</h3>
-      <div class="kvs">
-        <div><b>Total oils</b><div class="mono" id="totOils"></div></div>
-        <div><b>Total oils (oz)</b><div class="mono" id="totOilsOz"></div></div>
-      </div>
-      <div class="hr"></div>
+  <!-- RIGHT: Results -->
+  <section class="card" id="results" style="display:none">
+    <h3>Batch Results</h3>
+    <div class="kvs">
+      <div><b>Total oils</b><div class="mono" id="totOils"></div></div>
+      <div><b>Total oils (oz)</b><div class="mono" id="totOilsOz"></div></div>
+    </div>
+    <div class="hr"></div>
 
-      <div class="kvs">
-        <div><b>Lye (theoretical)</b><div class="mono" id="lyeTheo"></div></div>
-        <div><b>Purity-adjusted</b><div class="mono" id="lyeAdj"></div></div>
-      </div>
+    <div class="kvs">
+      <div><b>Lye (theoretical)</b><div class="mono" id="lyeTheo"></div></div>
+      <div><b>Purity-adjusted</b><div class="mono" id="lyeAdj"></div></div>
+    </div>
+    <div class="kvs" style="margin-top:6px">
+      <div><b>Lye after superfat</b><div class="mono" id="lyeFinal"></div></div>
+      <div><b>Lye (oz)</b><div class="mono" id="lyeFinalOz"></div></div>
+    </div>
+    <div class="kvs" style="margin-top:6px">
+      <div><b>Water</b><div class="mono" id="waterNeed"></div></div>
+      <div><b>Water (oz)</b><div class="mono" id="waterNeedOz"></div></div>
+    </div>
 
-      <div class="kvs" style="margin-top:6px">
-        <div><b>Lye after superfat</b><div class="mono" id="lyeFinal"></div></div>
-        <div><b>Lye (oz)</b><div class="mono" id="lyeFinalOz"></div></div>
-      </div>
+    <div class="hr"></div>
+    <h4>Additives & Fragrance</h4>
+    <div class="kvs">
+      <div><b>FO/EO</b><div class="mono" id="foNeed"></div></div>
+      <div><b>Sodium Lactate</b><div class="mono" id="lactateNeed"></div></div>
+    </div>
+    <div class="kvs">
+      <div><b>Salt</b><div class="mono" id="saltNeed"></div></div>
+      <div><b>Sugar</b><div class="mono" id="sugarNeed"></div></div>
+    </div>
+    <div class="kvs">
+      <div><b>Clays</b><div class="mono" id="clayNeed"></div></div>
+      <div><b>Honey</b><div class="mono" id="honeyNeed"></div></div>
+    </div>
+    <div class="kvs">
+      <div><b>Charcoal</b><div class="mono" id="charcoalNeed"></div></div>
+      <div><b>Sodium Citrate</b><div class="mono" id="citrateNeed"></div></div>
+    </div>
+    <div class="kvs">
+      <div><b>Colorant</b><div class="mono" id="colorNeed"></div></div>
+      <div><b>Botanicals</b><div class="mono" id="botNeed"></div></div>
+    </div>
+    <div class="hr"></div>
 
-      <div class="kvs" style="margin-top:6px">
-        <div><b>Water</b><div class="mono" id="waterNeed"></div></div>
-        <div><b>Water (oz)</b><div class="mono" id="waterNeedOz"></div></div>
-      </div>
+    <div class="kvs">
+      <div><b>Total batch (approx)</b><div class="mono" id="batchTot"></div></div>
+      <div><b>Total batch (oz)</b><div class="mono" id="batchTotOz"></div></div>
+    </div>
+    <div class="kvs">
+      <div><b>Recommended pot fill (60–75%)</b><div class="mono" id="fillRange">N/A</div></div>
+      <div><b>Status</b><div class="mono badge" id="capStatus">—</div></div>
+    </div>
 
-      <div class="hr"></div>
+    <div id="warnBox" class="mini" style="margin-top:10px"></div>
+  </section>
+</main>
 
-      <div class="kvs">
-        <div><b>Additives total</b><div class="mono" id="addsTot"></div></div>
-        <div><b>Fragrance</b><div class="mono" id="fragNeed"></div></div>
-      </div>
+<footer>
+  © 2025 Bel Lei’s Soaps N Stuffs • Lye, Dye, and DIY • Educational tool; verify with a trusted lye calc before production.
+</footer>
 
-      <div class="hr"></div>
+<script>
+/*** DATA ***/
+const SAP_NAOH = {
+  "Olive Oil (pure)":0.134,
+  "Coconut Oil 76°":0.183,
+  "Avocado Oil":0.133,
+  "Shea Butter":0.128,
+  "Lard":0.141,
+  "Castor Oil":0.128,
+  "Cocoa Butter":0.137,
+  "Sweet Almond Oil":0.136
+};
+const OIL_LIST = Object.keys(SAP_NAOH);
+const KOH_FACTOR = 1.403;
+const G_PER_TSP = 4.92892;  // water tsp; for solids this is an estimate (good for book/testing)
+function gToOz(g){return g/28.349523125;}
+/*** UI SETUP ***/
+const oilTbody=document.getElementById('oilTbody');
+function addOilRow(name="Olive Oil (pure)", grams=""){
+  const tr=document.createElement('tr');
+  tr.innerHTML=`
+    <td><select class="oilName">${OIL_LIST.map(o=>`<option ${o===name?'selected':''}>${o}</option>`).join('')}</select></td>
+    <td><input class="oilGrams" type="number" inputmode="decimal" placeholder="g" value="${grams}"/></td>
+    <td><button type="button" class="btn danger removeBtn">Remove</button></td>`;
+  oilTbody.appendChild(tr);
+  tr.querySelector('.removeBtn').onclick=()=>tr.remove();
+}
+addOilRow("Olive Oil (pure)",500);
+addOilRow("Coconut Oil 76°",300);
+document.getElementById('addOilBtn').onclick=()=>addOilRow();
 
-      <div class="kvs">
-        <div><b>Total batch (approx)</b><div class="mono" id="batchTot"></div></div>
-        <div><b>Total batch (oz)</b><div class="mono" id="batchTotOz"></div></div>
-      </div>
+const waterMode=document.getElementById('waterMode');
+const waterRatioWrap=document.getElementById('waterRatioWrap');
+const waterConcWrap=document.getElementById('waterConcWrap');
+waterMode.addEventListener('change',()=>{
+  const ratio=waterMode.value==="ratio";
+  waterRatioWrap.style.display=ratio?'':'none';
+  waterConcWrap.style.display=ratio?'none':'';
+});
 
-      <div class="hr"></div>
+/*** CALC ***/
+document.getElementById('calcBtn').addEventListener('click', ()=>{
+  const rows=[...document.querySelectorAll('#oilTbody tr')];
+  let totalOils=0, lyeTheo=0;
 
-      <div class="kvs">
-        <div><b>Recommended pot fill (60–75%)</b><div class="mono" id="fillRange">N/A</div></div>
-        <div><b>Status</b><div class="mono badge" id="capStatus">—</div></div>
-      </div>
+  const lyeType=document.getElementById('lyeType').value;
+  const purity=(Math.min(100,Math.max(80,parseFloat(document.getElementById('lyePurity').value)||100)))/100;
+  const sf=parseFloat(document.getElementById('superfat').value)||0;
 
-      <div class="mini" style="margin-top:10px">
-        Notes: SAP values are mid-range references. Always verify FO/EO against supplier IFRA.
-      </div>
-    </section>
-  </main>
+  rows.forEach(r=>{
+    const name=r.querySelector('.oilName').value;
+    const g=parseFloat(r.querySelector('.oilGrams').value)||0;
+    totalOils+=g;
+    const sap=(lyeType==='NaOH'?SAP_NAOH[name]:SAP_NAOH[name]*KOH_FACTOR);
+    lyeTheo+=g*sap;
+  });
+  if(totalOils<=0){alert('Please enter at least one oil with weight.');return;}
 
-  <footer>
-    © 2025 Bel Lei’s Soaps N Stuffs • Lye, Dye, and DIY • This tool is educational; verify batches with a trusted soap/lye calculator before production.
-  </footer>
+  let lyeAdj=lyeTheo/ purity;
+  let lyeFinal=lyeAdj*(1 - sf/100);
 
-  <script>
-    // --- SAP table (NaOH, g NaOH needed per g oil). KOH factor ≈ 1.403 ---
-    const SAP_NAOH = {
-      "Olive Oil (pure)": 0.134,
-      "Coconut Oil 76°": 0.183,
-      "Avocado Oil": 0.133,
-      "Shea Butter": 0.128,
-      "Lard": 0.141,
-      "Castor Oil": 0.128,
-      "Cocoa Butter": 0.137,
-      "Sweet Almond Oil": 0.136
+  // water
+  let water=0;
+  if(waterMode.value==='ratio'){
+    const r=parseFloat(document.getElementById('waterRatio').value)||2.5;
+    water=lyeFinal*r;
+  } else {
+    const conc=Math.min(50,Math.max(20,parseFloat(document.getElementById('lyeConc').value)||30))/100;
+    water=(lyeFinal/conc) - lyeFinal;
+  }
+
+  // additives
+  const getPct=(id,min=0,max=100)=>Math.min(max,Math.max(min,parseFloat(document.getElementById(id).value)||0));
+  const foPct=getPct('foPct',0,10);
+  const lactatePct=getPct('lactatePct',0,5);
+  const saltPct=getPct('saltPct',0,5);
+  const sugarPct=getPct('sugarPct',0,5);
+  const clayPct=getPct('clayPct',0,5);
+  const honeyPct=getPct('honeyPct',0,5);
+  const charcoalPct=getPct('charcoalPct',0,3);
+  const citratePct=getPct('citratePct',0,3);
+
+  const foG=totalOils*(foPct/100);
+  const lactateG=totalOils*(lactatePct/100);
+  const saltG=totalOils*(saltPct/100);
+  const sugarG=totalOils*(sugarPct/100);
+  const clayG=totalOils*(clayPct/100);
+  const honeyG=totalOils*(honeyPct/100);
+  const charcoalG=totalOils*(charcoalPct/100);
+  const citrateG=totalOils*(citratePct/100);
+
+  // PPO helpers
+  const ppo = totalOils / 453.59237; // pounds of oils
+  const colorTsp=parseFloat(document.getElementById('colorTsp').value)||0;
+  const botTsp=parseFloat(document.getElementById('botTsp').value)||0;
+  const colorG=colorTsp*ppo*G_PER_TSP;
+  const botG=botTsp*ppo*G_PER_TSP;
+
+  // Milk replacement
+  const milkPct=getPct('milkPct',0,100);
+  const milkG=water*(milkPct/100);
+  const waterActual=water - milkG;
+
+  const batchTotal=totalOils + lyeFinal + waterActual + milkG + foG + lactateG + saltG + sugarG + clayG + honeyG + charcoalG + citrateG + colorG + botG;
+
+  // Capacity
+  const pot=parseFloat(document.getElementById('potCapacity').value)||0;
+  let fillText='N/A', status='—', cls='';
+  if(pot>0){
+    const min=pot*0.60, max=pot*0.75;
+    fillText=`${min.toFixed(0)}–${max.toFixed(0)} g`;
+    if(batchTotal<=max){status='✅ Safe'; cls='ok';}
+    else if(batchTotal<=pot){status='⚠️ High (reduce)'; cls='warn';}
+    else {status='🚫 Overflow risk'; cls='danger';}
+  }
+
+  // Results
+  q('totOils').textContent=`${totalOils.toFixed(2)} g`;
+  q('totOilsOz').textContent=`${gToOz(totalOils).toFixed(2)} oz`;
+  q('lyeTheo').textContent=`${lyeTheo.toFixed(2)} g ${lyeType}`;
+  q('lyeAdj').textContent=`${lyeAdj.toFixed(2)} g @ purity`;
+  q('lyeFinal').textContent=`${lyeFinal.toFixed(2)} g (after ${sf}% SF)`;
+  q('lyeFinalOz').textContent=`${gToOz(lyeFinal).toFixed(2)} oz`;
+
+  q('waterNeed').textContent=`${waterActual.toFixed(2)} g water  + ${milkG.toFixed(2)} g milk`;
+  q('waterNeedOz').textContent=`${gToOz(waterActual).toFixed(2)} oz + ${gToOz(milkG).toFixed(2)} oz milk`;
+
+  q('foNeed').textContent=`${foG.toFixed(2)} g (${foPct}%)`;
+  q('lactateNeed').textContent=`${lactateG.toFixed(2)} g (${lactatePct}%)`;
+  q('saltNeed').textContent=`${saltG.toFixed(2)} g (${saltPct}%)`;
+  q('sugarNeed').textContent=`${sugarG.toFixed(2)} g (${sugarPct}%)`;
+  q('clayNeed').textContent=`${clayG.toFixed(2)} g (${clayPct}%)`;
+  q('honeyNeed').textContent=`${honeyG.toFixed(2)} g (${honeyPct}%)`;
+  q('charcoalNeed').textContent=`${charcoalG.toFixed(2)} g (${charcoalPct}%)`;
+  q('citrateNeed').textContent=`${citrateG.toFixed(2)} g (${citratePct}%)`;
+  q('colorNeed').textContent=`${colorG.toFixed(2)} g  (~${colorTsp} tsp PPO)`;
+  q('botNeed').textContent=`${botG.toFixed(2)} g  (~${botTsp} tsp PPO)`;
+
+  q('batchTot').textContent=`${batchTotal.toFixed(2)} g`;
+  q('batchTotOz').textContent=`${gToOz(batchTotal).toFixed(2)} oz`;
+  q('fillRange').textContent=fillText;
+  const cap=q('capStatus'); cap.textContent=status; cap.className='mono badge '+cls;
+
+  // Warnings
+  const warns=[];
+  addWarn(warns, foPct, 2, 6, "Fragrance/EO", "Typical 2–6% (check IFRA).");
+  addWarn(warns, lactatePct, 1, 3, "Sodium Lactate", "Common 1–3% of oils (in water).");
+  addWarn(warns, saltPct, 0, 3, "Salt", "Usually 0–3%.");
+  addWarn(warns, sugarPct, 0, 3, "Sugar", "Usually 0–3%.");
+  addWarn(warns, clayPct, 0, 2, "Clays", "Usually 0–2% (may speed trace).");
+  addWarn(warns, honeyPct, 0, 3, "Honey", "≤3%; watch gel/heat.");
+  addWarn(warns, charcoalPct, 0, 1, "Charcoal", "0–1%; more may bleed.");
+  addWarn(warns, citratePct, 0, 1, "Sodium Citrate", "0–1% typical.");
+  q('warnBox').innerHTML=warns.join('') || '<div class="mini ok">All additive levels within typical ranges.</div>';
+
+  document.getElementById('results').style.display='block';
+
+  // Export/print
+  document.getElementById('printBtn').onclick=()=>window.print();
+  document.getElementById('exportBtn').onclick=()=>{
+    const data={
+      oils: rows.map(r=>({oil:r.querySelector('.oilName').value, g:parseFloat(r.querySelector('.oilGrams').value)||0})),
+      lyeType, purity, superfat:sf,
+      waterMode:waterMode.value, waterRatio:parseFloat(val('waterRatio')), lyeConc:parseFloat(val('lyeConc')),
+      additives:{foPct,lactatePct,saltPct,sugarPct,clayPct,honeyPct,charcoalPct,citratePct,colorTsp,botTsp,milkPct},
+      results:{totalOils,lyeTheo,lyeAdj,lyeFinal,waterActual,milkG,foG,lactateG,saltG,sugarG,clayG,honeyG,charcoalG,citrateG,colorG,botG,batchTotal,status}
     };
-    const OIL_LIST = Object.keys(SAP_NAOH);
-    const KOH_FACTOR = 1.403;
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='lye-dye-diy-batch.json'; a.click();
+  };
+});
 
-    const oilTbody = document.getElementById('oilTbody');
-    const addOilBtn = document.getElementById('addOilBtn');
+function q(id){return document.getElementById(id);}
+function val(id){const el=document.getElementById(id); return el?el.value:null;}
+function addWarn(list, pct, low, high, name, tip){
+  if(pct===0||isNaN(pct)) return;
+  if(pct<low) list.push(`<div class="warnline">⚠️ <b>${name}</b> is on the low side (${pct}%). ${tip}</div>`);
+  else if(pct>high) list.push(`<div class="dangerline">🚫 <b>${name}</b> is high (${pct}%). ${tip}</div>`);
+}
 
-    function addOilRow(name = "Olive Oil (pure)", grams = "") {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>
-          <select class="oilName">
-            ${OIL_LIST.map(o => `<option ${o===name?'selected':''}>${o}</option>`).join('')}
-          </select>
-        </td>
-        <td><input class="oilGrams" type="number" inputmode="decimal" placeholder="g" value="${grams}"/></td>
-        <td><button type="button" class="btn danger removeBtn">Remove</button></td>
-      `;
-      oilTbody.appendChild(tr);
-      tr.querySelector('.removeBtn').onclick = () => tr.remove();
-    }
-
-    // seed two rows
-    addOilRow("Olive Oil (pure)", 500);
-    addOilRow("Coconut Oil 76°", 300);
-    addOilBtn.onclick = () => addOilRow();
-
-    // Water mode toggles
-    const waterMode = document.getElementById('waterMode');
-    const waterRatioWrap = document.getElementById('waterRatioWrap');
-    const waterConcWrap  = document.getElementById('waterConcWrap');
-    waterMode.addEventListener('change', () => {
-      const useRatio = waterMode.value === 'ratio';
-      waterRatioWrap.style.display = useRatio ? '' : 'none';
-      waterConcWrap.style.display  = useRatio ? 'none' : '';
-    });
-
-    function gToOz(g){ return g/28.349523125; }
-
-    document.getElementById('calcBtn').addEventListener('click', () => {
-      // Gather oils
-      const rows = [...document.querySelectorAll('#oilTbody tr')];
-      let totalOils = 0;
-      let lyeTheo = 0;
-
-      const lyeType = document.getElementById('lyeType').value; // NaOH or KOH
-      const sf      = parseFloat(document.getElementById('superfat').value) || 0;
-      const purity  = Math.min(100, Math.max(80, parseFloat(document.getElementById('lyePurity').value)||100)) / 100;
-
-      rows.forEach(row => {
-        const name  = row.querySelector('.oilName').value;
-        const grams = parseFloat(row.querySelector('.oilGrams').value)||0;
-        totalOils += grams;
-        const sapNaoh = SAP_NAOH[name] || 0.134;
-        const sap = (lyeType === 'NaOH') ? sapNaoh : sapNaoh * KOH_FACTOR;
-        lyeTheo += grams * sap; // theoretical pure lye
-      });
-
-      if (totalOils <= 0) { alert('Please enter at least one oil with weight.'); return; }
-
-      // Adjust for lye purity (actual lye needed to deliver theoretical amount)
-      let lyeAdj = lyeTheo / purity;
-
-      // Apply superfat (lye discount).
-      let lyeFinal = lyeAdj * (1 - sf/100);
-
-      // Water
-      const mode = waterMode.value;
-      let water = 0;
-      if (mode === 'ratio') {
-        const r = parseFloat(document.getElementById('waterRatio').value)||2.5;
-        water = lyeFinal * r;
-      } else {
-        const conc = Math.min(50, Math.max(20, parseFloat(document.getElementById('lyeConc').value)||30)) / 100; // lye/(lye+water)
-        water = (lyeFinal / conc) - lyeFinal;
-      }
-
-      // Additives and fragrance
-      const saltPct  = parseFloat(document.getElementById('saltPct').value)||0;
-      const sugarPct = parseFloat(document.getElementById('sugarPct').value)||0;
-      const clayPct  = parseFloat(document.getElementById('clayPct').value)||0;
-      const addsTot  = totalOils * (saltPct + sugarPct + clayPct) / 100;
-
-      const fragPct  = parseFloat(document.getElementById('fragPct').value)||0;
-      const fragG    = totalOils * (fragPct/100);
-
-      // Batch total (approx)
-      const batchTotal = totalOils + lyeFinal + water + addsTot + fragG;
-
-      // Capacity check
-      const pot = parseFloat(document.getElementById('potCapacity').value)||0;
-      let fillText = 'N/A', status='—', cls='';
-      if (pot > 0) {
-        const min = pot*0.60, max = pot*0.75;
-        fillText = `${min.toFixed(0)}–${max.toFixed(0)} g`;
-        if (batchTotal <= max) { status='✅ Safe'; cls='ok'; }
-        else if (batchTotal <= pot) { status='⚠️ High (reduce)'; cls='warn'; }
-        else { status='🚫 Overflow risk'; cls='danger'; }
-      }
-
-      // Write results
-      document.getElementById('totOils').textContent    = `${totalOils.toFixed(2)} g`;
-      document.getElementById('totOilsOz').textContent  = `${gToOz(totalOils).toFixed(2)} oz`;
-
-      document.getElementById('lyeTheo').textContent    = `${lyeTheo.toFixed(2)} g ${lyeType}`;
-      document.getElementById('lyeAdj').textContent     = `${lyeAdj.toFixed(2)} g @ purity`;
-      document.getElementById('lyeFinal').textContent   = `${lyeFinal.toFixed(2)} g (after ${sf}% SF)`;
-      document.getElementById('lyeFinalOz').textContent = `${gToOz(lyeFinal).toFixed(2)} oz`;
-
-      document.getElementById('waterNeed').textContent  = `${water.toFixed(2)} g`;
-      document.getElementById('waterNeedOz').textContent= `${gToOz(water).toFixed(2)} oz`;
-
-      document.getElementById('addsTot').textContent    = `${addsTot.toFixed(2)} g (salt+sugar+clay)`;
-      document.getElementById('fragNeed').textContent   = `${fragG.toFixed(2)} g @ ${fragPct}%`;
-
-      document.getElementById('batchTot').textContent   = `${batchTotal.toFixed(2)} g`;
-      document.getElementById('batchTotOz').textContent = `${gToOz(batchTotal).toFixed(2)} oz`;
-
-      document.getElementById('fillRange').textContent  = fillText;
-      const cap = document.getElementById('capStatus');
-      cap.textContent = status; cap.className='mono badge ' + cls;
-
-      document.getElementById('results').style.display='block';
-    });
-
-    // PWA SW registration (already in your repo)
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch(()=>{});
-      });
-    }
-  </script>
+/*** PWA ***/
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))}
+</script>
 </body>
 </html>
