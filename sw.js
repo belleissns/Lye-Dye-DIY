@@ -1,6 +1,5 @@
 /* Lye, Dye & DIY - offline cache */
-const CACHE_VERSION = 'v1.0.0';
-const CACHE_NAME = `lye-dye-diy-${CACHE_VERSION}`;
+const CACHE_VERSION = 'v1.0.0';const CACHE_NAME = "lye-dye-diy-v3"; // bump this
 const FILES_TO_CACHE = [
   './',
   './index.html',
