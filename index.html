@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Lye, Dye, and DIY — Bel Lei’s Soap Calculator (v0.5)</title>
+<title>Lye, Dye, and DIY — Bel Lei’s Soap Calculator (v0.6)</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -12,7 +12,7 @@
 :root{
   --brand:#98273B; --brand2:#F7707E; --olive:#7F894B;
   --ink:#222; --muted:#6b7280; --bg:#fff8f8; --panel:#ffffff;
-  --ok:#10b981; --warn:#f59e0b; --danger:#ef4444;
+  --ok:#10b981; --warn:#f59e0b; --danger:#ef4444; --line:#eef2f7;
   --ring:0 0 0 3px rgba(152,39,59,.18);
 }
 *{box-sizing:border-box}
@@ -31,7 +31,7 @@ h1{margin:0 0 4px;font-size:26px;letter-spacing:.3px}
 .tabbar{display:flex;gap:8px;flex-wrap:wrap}
 .tab{background:#fff;border:1px solid #e5e7eb;border-radius:999px;padding:8px 12px;cursor:pointer}
 .tab.active{background:var(--brand);color:#fff;border-color:var(--brand)}
-input,select{width:100%;padding:12px;border:1px solid #e5e7eb;border-radius:10px;background:#fff}
+input,select,textarea{width:100%;padding:12px;border:1px solid #e5e7eb;border-radius:10px;background:#fff}
 label{font-weight:700;font-size:14px;margin-bottom:6px;display:block}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
@@ -43,13 +43,14 @@ label{font-weight:700;font-size:14px;margin-bottom:6px;display:block}
 .table{width:100%;border-collapse:collapse}
 .table th,.table td{padding:8px;border-bottom:1px solid #eee;text-align:left;font-size:14px}
 .kpi{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
-.kpi > div{background:#f9fafb;border:1px solid #eef2f7;border-radius:10px;padding:8px 10px;font-size:13px}
+.kpi > div{background:#f9fafb;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px}
 .section-title{display:flex;align-items:center;justify-content:space-between;margin:6px 0 8px}
 .tag{background:#fff;border:1px solid #e5e7eb;padding:5px 8px;border-radius:8px;font-size:12px}
 fieldset{border:none;margin:0;padding:0}
 legend{font-weight:800;margin-bottom:6px}
 .hide{display:none!important}
 .stickyCalc{position:sticky;bottom:10px;z-index:5}
+blockquote.tip{border-left:4px solid var(--olive);padding:6px 10px;background:#fbfff5;border-radius:6px}
 @media (max-width:760px){
   .row,.row3{grid-template-columns:1fr}
   header{padding:16px 12px}
@@ -65,7 +66,7 @@ legend{font-weight:800;margin-bottom:6px}
 <body>
 <header>
   <h1>Lye, Dye, and DIY</h1>
-  <div class="small">Bel Lei’s Soaps N Stuffs • Beginner-friendly, pro-accurate calculator (v0.5)</div>
+  <div class="small">Bel Lei’s Soaps N Stuffs • Beginner-friendly, pro-accurate calculator (v0.6)</div>
 </header>
 
 <div class="container grid">
@@ -73,18 +74,28 @@ legend{font-weight:800;margin-bottom:6px}
   <!-- tabs -->
   <div class="tabbar" role="tablist" aria-label="sections">
     <div class="tab active" data-tab="calc">Calculator</div>
+    <div class="tab" data-tab="design">Design Helper</div>
     <div class="tab" data-tab="lyelimited">Lye-Limited</div>
     <div class="tab" data-tab="cost">Cost & Profit</div>
     <div class="tab" data-tab="save">Save / Load</div>
-    <div class="tab" data-tab="feedback">Feedback</div>
     <div class="tab" data-tab="install"><span id="installLabel">Install App</span></div>
   </div>
 
   <!-- CALC -->
-  <section class="card grid" id="calc" role="tabpanel" aria-labelledby="calc-tab">
+  <section class="card grid" id="calc" role="tabpanel">
     <div class="section-title">
       <h2 style="margin:0">Calculator</h2>
       <span class="tag" id="modeTag">Quick Mode</span>
+    </div>
+
+    <div class="controls">
+      <button class="btn subtle" onclick="quickMode()">Quick</button>
+      <button class="btn subtle" onclick="togglePro()">Pro Mode</button>
+      <button class="btn subtle" onclick="copyRecipe()">Copy</button>
+      <button class="btn subtle" onclick="shareRecipe()">Share</button>
+      <button class="btn subtle" onclick="print()">Print</button>
+      <button class="btn subtle" onclick="exportJSON()">Export JSON</button>
+      <button class="btn alt hide" id="installBtn" onclick="installApp()">Install App</button>
     </div>
 
     <!-- targets -->
@@ -105,16 +116,29 @@ legend{font-weight:800;margin-bottom:6px}
       </div>
     </div>
 
+    <!-- use-what-you-have -->
+    <section class="card" style="border:1px dashed var(--line)">
+      <div class="section-title"><h3 style="margin:0">Use what you have</h3><span class="note">Check oils on hand → suggest a safe blend</span></div>
+      <div class="row">
+        <div>
+          <label>Available oils (tick all that apply)</label>
+          <div id="uwhyList" class="kpi"></div>
+        </div>
+        <div style="align-self:end">
+          <button class="btn subtle" onclick="suggestBlend()">Suggest blend</button>
+        </div>
+      </div>
+      <blockquote class="tip">Heuristic: balances hardness, conditioning, bubbly/creamy. You can still tweak in the Oils table.</blockquote>
+    </section>
+
     <!-- oil editor -->
     <fieldset>
       <legend>Oils & Butters</legend>
-
       <div class="controls">
         <button class="btn subtle" onclick="addOilRow()">+ Add oil</button>
         <button class="btn subtle" onclick="togglePctMode()" id="pctBtn">Percent mode: Off</button>
         <button class="btn subtle" onclick="scaleToTarget()">Scale to target</button>
       </div>
-
       <table class="table" id="oilTable">
         <thead><tr><th>Oil</th><th style="width:160px"><span id="wtHdr">Weight (g)</span></th><th></th></tr></thead>
         <tbody id="oilBody"></tbody>
@@ -143,7 +167,6 @@ legend{font-weight:800;margin-bottom:6px}
           <input id="kohPurity" type="number" value="90">
         </div>
       </div>
-
       <div class="row3" id="dualBox" class="hide">
         <div>
           <label for="dualPct">Dual-lye: % as NaOH (rest KOH)</label>
@@ -155,7 +178,6 @@ legend{font-weight:800;margin-bottom:6px}
         </div>
         <div class="note" style="align-self:end">Beginner tip: 3–8% is common.</div>
       </div>
-
       <div class="row3">
         <div>
           <label for="waterMode">Water mode</label>
@@ -177,13 +199,32 @@ legend{font-weight:800;margin-bottom:6px}
         </div>
       </div>
 
-      <div class="row3">
-        <div>
-          <label for="potMl">Pot / Crockpot capacity (mL)</label>
-          <input id="potMl" type="number" value="5678">
+      <!-- Fragrance Advisor -->
+      <section class="card" style="border:1px dashed var(--line)">
+        <div class="section-title"><h3 style="margin:0">Fragrance Advisor</h3><span class="note">Simple guardrails (soap category)</span></div>
+        <div class="row3">
+          <div>
+            <label for="fragType">Type</label>
+            <select id="fragType">
+              <option value="FO">Fragrance Oil (FO)</option>
+              <option value="EO">Essential Oil (EO)</option>
+            </select>
+          </div>
+          <div>
+            <label for="fragName">Scent name (optional)</label>
+            <input id="fragName" placeholder="e.g., Cinnamon, Lemon, Lavender">
+          </div>
+          <div>
+            <label for="fragPct">Fragrance / EO % of oils</label>
+            <input id="fragPct" type="number" value="3" step="0.1">
+          </div>
         </div>
-        <div>
-          <label for="moldPreset">Mold helper</label>
+        <div class="kpi" id="fragBadges"></div>
+      </section>
+
+      <div class="row3">
+        <div><label for="potMl">Pot / Crockpot capacity (mL)</label><input id="potMl" type="number" value="5678"></div>
+        <div><label for="moldPreset">Mold helper</label>
           <select id="moldPreset" onchange="setMold()">
             <option value="">— choose —</option>
             <option value="loaf">Loaf (L×W×H cm)</option>
@@ -193,7 +234,6 @@ legend{font-weight:800;margin-bottom:6px}
         </div>
         <div class="note" style="align-self:end">Safe headroom: usually 60–75% fill.</div>
       </div>
-
       <div id="moldInputs" class="row3 hide">
         <div><label>L (cm)</label><input id="mL" type="number"></div>
         <div><label>W (cm)</label><input id="mW" type="number"></div>
@@ -208,24 +248,22 @@ legend{font-weight:800;margin-bottom:6px}
     <fieldset>
       <legend>Additives (% of oils unless noted)</legend>
       <div class="row3">
-        <div><label for="fragPct">Fragrance / EO %</label><input id="fragPct" type="number" value="3" step="0.1"></div>
         <div><label for="slPct">Sodium Lactate % (in water)</label><input id="slPct" type="number" value="0" placeholder="1–3"></div>
         <div><label for="saltPct">Salt %</label><input id="saltPct" type="number" value="0" placeholder="0–3"></div>
+        <div><label for="sugarPct">Sugar %</label><input id="sugarPct" type="number" value="0" placeholder="0–3"></div>
       </div>
       <div class="row3">
-        <div><label for="sugarPct">Sugar %</label><input id="sugarPct" type="number" value="0" placeholder="0–3"></div>
         <div><label for="clayPct">Clay %</label><input id="clayPct" type="number" value="0" placeholder="0–2"></div>
         <div><label for="chelPct">EDTA/Citrate %</label><input id="chelPct" type="number" value="0.3" step="0.1"></div>
+        <div class="note" style="align-self:end">Add “honey” or “aloe” by % in notes (future field coming).</div>
       </div>
       <div class="kpi" id="additiveBadges"></div>
     </fieldset>
 
-    <!-- sticky calculate -->
     <div class="controls stickyCalc">
       <button class="btn" onclick="calculate()">Calculate</button>
       <button class="btn subtle" onclick="print()">Print</button>
       <button class="btn subtle" onclick="exportJSON()">Export JSON</button>
-      <button class="btn alt hide" id="installBtn" onclick="installApp()">Install App</button>
     </div>
 
     <!-- results -->
@@ -235,7 +273,41 @@ legend{font-weight:800;margin-bottom:6px}
         <table class="table" id="resTable"></table>
         <div class="kpi" id="safetyBadges"></div>
       </div>
+      <div style="margin-top:8px">
+        <details>
+          <summary><b>INCI ingredients (for label)</b></summary>
+          <div id="inciList" class="note"></div>
+        </details>
+      </div>
     </section>
+  </section>
+
+  <!-- DESIGN HELPER -->
+  <section class="card grid hide" id="design" role="tabpanel">
+    <h2 style="margin:0">Design Helper</h2>
+
+    <fieldset class="card" style="border:1px dashed var(--line)">
+      <legend>Layer Planner</legend>
+      <div class="row3">
+        <div><label>Layers</label><select id="layCount"><option>2</option><option selected>3</option><option>4</option><option>5</option></select></div>
+        <div><label>Split</label><select id="laySplit"><option value="equal" selected>Equal</option><option value="custom">Custom %</option></select></div>
+        <div><label>Trace target</label><select id="layTrace"><option>Emulsion</option><option selected>Light</option><option>Medium</option></select></div>
+      </div>
+      <div id="layPctWrap" class="row hide"></div>
+      <div class="controls"><button class="btn subtle" onclick="planLayers()">Plan layers</button></div>
+      <table class="table" id="layTable"></table>
+      <blockquote class="tip">Workflow: bring entire batch to **emulsion/light trace**, split into bowls by layer %, color/scent each bowl, pour layers (wait ~3–8 min between if you want clean lines).</blockquote>
+    </fieldset>
+
+    <fieldset class="card" style="border:1px dashed var(--line)">
+      <legend>Swirl Tips</legend>
+      <div class="row3">
+        <div><label>Technique</label><select id="swirlType"><option>In-the-Pot (ITP)</option><option>Drop Swirl</option><option>Hanger Swirl</option></select></div>
+        <div><label>Recommended trace</label><input id="swirlTrace" value="Light to medium"></div>
+        <div><label>Notes</label><input id="swirlNotes" value="Color 2–4 portions; pour high for drop; tool for hanger."></div>
+      </div>
+      <div class="note">These are reminders; the calculator amounts don’t change for swirls (you just split and color). Timing depends on recipe + temp + fragrance behavior.</div>
+    </fieldset>
   </section>
 
   <!-- LYE-LIMITED -->
@@ -288,14 +360,6 @@ legend{font-weight:800;margin-bottom:6px}
     <div id="saveList" class="kpi"></div>
   </section>
 
-  <!-- FEEDBACK -->
-  <section class="card grid hide" id="feedback" role="tabpanel">
-    <h2 style="margin:0">Feedback</h2>
-    <p class="note">Beta testers: drop your notes below (saved locally to your browser) and include Export JSON with your report so we can replay your exact inputs.</p>
-    <textarea id="fb" rows="6" style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:10px"></textarea>
-    <div class="controls"><button class="btn subtle" onclick="localStorage.setItem('bel_fb',$('#fb').value||'');alert('Saved locally!')">Save note</button></div>
-  </section>
-
 </div>
 
 <script>
@@ -305,6 +369,14 @@ const SAP_NaOH = { // g NaOH per g oil
   "Lard":0.141, "Shea Butter (raw)":0.128, "Castor Oil":0.128
 };
 const OILS = Object.keys(SAP_NaOH);
+const INCI = {
+  "Olive Oil (pure)":"Olea Europaea (Olive) Fruit Oil",
+  "Coconut Oil 76°":"Cocos Nucifera (Coconut) Oil",
+  "Avocado Oil":"Persea Gratissima (Avocado) Oil",
+  "Lard":"Lard",
+  "Shea Butter (raw)":"Butyrospermum Parkii (Shea) Butter",
+  "Castor Oil":"Ricinus Communis (Castor) Seed Oil"
+};
 const KOH_FACTOR = 1.403; // KOH SAP ≈ NaOH SAP * 1.403
 
 const defaults = {
@@ -315,7 +387,7 @@ const additivesSpec = {
   frag:{min:0,max:4.5}, sl:{min:0,max:3}, salt:{min:0,max:3},
   sugar:{min:0,max:3}, clay:{min:0,max:2}, chel:{min:0,max:0.5}
 };
-let percentMode = false;
+let percentMode=false;
 
 /* ========= HELPERS ========= */
 const $=s=>document.querySelector(s);
@@ -323,6 +395,7 @@ function badge(level,text){const c=level==="ok"?"b-ok":level==="warn"?"b-warn":"
 function oilRows(){return [...$("#oilBody").children].map(tr=>[tr.querySelector("select").value, parseFloat(tr.querySelector("input").value||0)]);}
 function sum(arr){return arr.reduce((s,x)=>s+x,0)}
 function cssId(n){return n.replace(/[^a-z0-9]/gi,'_')}
+function gramsToOz(g){return g/28.3495}
 
 /* ========= UI BUILD ========= */
 function addOilRow(name="", val=0){
@@ -337,7 +410,7 @@ function updateOilTotals(){
   const rows=oilRows();
   let total = sum(rows.map(([_,v])=>v||0));
   if(percentMode){ $("#oilTotals").innerHTML=`<div>Total %: <b>${total.toFixed(1)}%</b> (target ${$("#targetOils").value} g)</div>`; }
-  else $("#oilTotals").innerHTML=`<div>Total oils: <b>${total.toFixed(1)} g</b> (${(total/28.3495).toFixed(2)} oz)</div>`;
+  else $("#oilTotals").innerHTML=`<div>Total oils: <b>${total.toFixed(1)} g</b> (${gramsToOz(total).toFixed(2)} oz)</div>`;
 }
 function applyProfile(){
   const tgt=+$("#targetOils").value||0;
@@ -377,260 +450,3 @@ function scaleToTarget(){
     const curr = sum(rows.map(r=>r[1]||0))||1;
     const factor = tgt/curr;
     $("#oilBody").innerHTML="";
-    rows.forEach(([name,g])=> addOilRow(name, Math.round(g*factor)) );
-  }
-  percentMode=false; togglePctMode(); percentMode=false; togglePctMode(); // reset header cleanly
-}
-
-/* ========= MOLD ========= */
-function setMold(){ $("#moldInputs").classList.toggle('hide', !$("#moldPreset").value); }
-function estimateFromMold(){
-  const type=$("#moldPreset").value; let ml=0;
-  if(type==="loaf"||type==="slab"){
-    const L=+$("#mL").value||0, W=+$("#mW").value||0, H=+$("#mH").value||0; ml=L*W*H;
-  }else if(type==="cavity"){
-    const v=+$("#cavMl").value||0, n=+$("#cavCount").value||0; ml=v*n;
-  }
-  if(ml>0){ $("#targetOils").value=Math.round(ml*0.7); }
-}
-
-/* ========= MATH ========= */
-function calcLyeFromOils(rows, sf, split){ 
-  // split: {type:'NaOH'|'KOH'|'dual', pctNa:0..1}
-  const baseNa = sum(rows.map(([name,g])=> g*(SAP_NaOH[name]||0)));
-  const neededNa = baseNa*(1 - sf/100);
-  if(split.type==='NaOH'){
-    return {na: neededNa*(100/Math.max(1,+$("#lyePurity").value||100)), ko:0};
-  }
-  if(split.type==='KOH'){
-    const koSAP = neededNa*KOH_FACTOR; // convert to KOH base before purity
-    return {na:0, ko: koSAP*(100/Math.max(1,+$("#kohPurity").value||90))};
-  }
-  // dual:
-  const pctNa = ( +$("#dualPct").value || 90 )/100;
-  const na = neededNa*pctNa*(100/Math.max(1,+$("#lyePurity").value||100));
-  const ko = (neededNa*(1-pctNa)*KOH_FACTOR)*(100/Math.max(1,+$("#kohPurity").value||90));
-  return {na, ko};
-}
-function waterFromMode(mode,param, totalNaOH_g, totalOils_g){
-  if(mode==="ratio") return totalNaOH_g*param;
-  if(mode==="pctOil") return totalOils_g*(param/100);
-  if(mode==="pctSoln"){ const conc=param/100; return totalNaOH_g*(1-conc)/conc; }
-  if(mode==="master"){ const conc=param/100; return totalNaOH_g*(1-conc)/conc; }
-  return totalNaOH_g*2.5;
-}
-function addPct(gOils,p){ return gOils*(p/100); }
-function rangeBadge(val,min,max,label){
-  if(val===0) return badge("ok",`${label}: 0 (unused)`);
-  if(val<min) return badge("warn",`${label}: low (${val.toFixed(2)}%; min ${min}%)`);
-  if(val>max) return badge("danger",`${label}: high (${val.toFixed(2)}%; max ${max}%)`);
-  return badge("ok",`${label}: ${val.toFixed(2)}% ok`);
-}
-
-/* ========= CALCULATE ========= */
-function calculate(){
-  const rows=oilRows(); const gOils=sum(rows.map(([_,g])=>g||0));
-  const sf = +$("#superfat").value||0;
-  const split = {type:$("#lyeType").value};
-  const {na,ko} = calcLyeFromOils(rows,sf,split);
-  const totalNa = na + (ko/KOH_FACTOR); // convert KOH back to NaOH equivalent for water ratio math
-  const water = waterFromMode($("#waterMode").value, +$("#waterParam").value||2.5, totalNa, gOils);
-
-  // additives
-  const fragPct=+$("#fragPct").value||0, slPct=+$("#slPct").value||0, saltPct=+$("#saltPct").value||0,
-        sugarPct=+$("#sugarPct").value||0, clayPct=+$("#clayPct").value||0, chelPct=+$("#chelPct").value||0;
-  const fo=addPct(gOils,fragPct), sl=addPct(gOils,slPct), salt=addPct(gOils,saltPct),
-        sugar=addPct(gOils,sugarPct), clay=addPct(gOils,clayPct), chel=addPct(gOils,chelPct);
-
-  const milk = water*((+$("#milkPct").value||0)/100);
-  const batch = gOils + (na+ko) + water + fo + sl + salt + sugar + clay + chel;
-
-  // capacity
-  const pot = +$("#potMl").value||0; const safeMin=pot*0.60, safeMax=pot*0.75;
-
-  // results
-  $("#resTable").innerHTML = `
-    <tr><th>NaOH (solid)</th><td>${na.toFixed(2)} g</td></tr>
-    <tr><th>KOH (flakes)</th><td>${ko.toFixed(2)} g</td></tr>
-    <tr><th>Water (total)</th><td>${water.toFixed(2)} g</td></tr>
-    <tr><th>Milk portion</th><td>${milk.toFixed(2)} g (${(+$("#milkPct").value||0)}%)</td></tr>
-    <tr><th>Fragrance / EO</th><td>${fo.toFixed(2)} g (${fragPct}%)</td></tr>
-    <tr><th>Sodium Lactate</th><td>${sl.toFixed(2)} g (${slPct}%)</td></tr>
-    <tr><th>Salt</th><td>${salt.toFixed(2)} g (${saltPct}%)</td></tr>
-    <tr><th>Sugar</th><td>${sugar.toFixed(2)} g (${sugarPct}%)</td></tr>
-    <tr><th>Clay</th><td>${clay.toFixed(2)} g (${clayPct}%)</td></tr>
-    <tr><th>EDTA/Citrate</th><td>${chel.toFixed(2)} g (${chelPct}%)</td></tr>
-    <tr><th><b>Total batch weight</b></th><td><b>${batch.toFixed(1)} g</b></td></tr>
-    ${pot?`<tr><th>Recommended pot fill (60–75%)</th><td>${safeMin.toFixed(0)}–${safeMax.toFixed(0)} g</td></tr>`:''}
-  `;
-
-  const caps=[];
-  if(sf<2) caps.push(badge("warn",`Superfat low (${sf}%). 3–8% typical.`));
-  if(sf>12) caps.push(badge("danger",`Superfat high (${sf}%).`));
-  const wm=$("#waterMode").value, wp=+$("#waterParam").value||2.5;
-  if(wm==="ratio" && (wp<1.7||wp>3.0)) caps.push(badge("warn",`Water:lye ${wp} outside common range (1.7–3.0).`));
-  if(pot){ if(batch>safeMax) caps.push(badge("danger","Batch exceeds ~75% capacity → overflow risk."));
-           else if(batch>=safeMin) caps.push(badge("ok","Capacity: within safe headroom.")) }
-  $("#safetyBadges").innerHTML=caps.join(" ");
-
-  $("#additiveBadges").innerHTML =
-    rangeBadge(fragPct,0,additivesSpec.frag.max,"FO/EO")+
-    rangeBadge(slPct,1,additivesSpec.sl.max,"Sodium Lactate")+
-    rangeBadge(saltPct,0,additivesSpec.salt.max,"Salt")+
-    rangeBadge(sugarPct,0,additivesSpec.sugar.max,"Sugar")+
-    rangeBadge(clayPct,0,additivesSpec.clay.max,"Clay")+
-    rangeBadge(chelPct,0,additivesSpec.chel.max,"Chelator");
-
-  renderCostTable(rows, {fo});
-  window._last={na,ko,water,fo,batch,rows};
-}
-
-/* ========= LYE-LIMITED ========= */
-function profileToPercents(key){
-  if(key==="hard40") return [["Olive Oil (pure)",40],["Lard",40],["Coconut Oil 76°",15],["Castor Oil",5]];
-  if(key==="bubbles") return [["Olive Oil (pure)",35],["Coconut Oil 76°",35],["Lard",20],["Castor Oil",10]];
-  return [["Olive Oil (pure)",45],["Coconut Oil 76°",30],["Lard",15],["Shea Butter (raw)",10]];
-}
-function calcLyeLimited(){
-  const naAvail = +$("#availLye").value||0;
-  const sf = +$("#sfLL").value||5;
-  const ratio = +$("#ratioLL").value||2.5;
-  const plan = profileToPercents($("#profileLL").value);
-  // oil grams needed per 1 g NaOH at given profile:
-  const SAPmix = sum(plan.map(([n,p])=> (p/100)*(SAP_NaOH[n]||0)));
-  const oilsForNa = (naAvail) / ((1 - sf/100) * SAPmix); // g oils possible
-  const fo = oilsForNa*0.03;
-  const water = naAvail*ratio;
-  const rows = plan.map(([n,p])=> [n, oilsForNa*(p/100)]);
-  const batch = oilsForNa + naAvail + water + fo;
-  $("#llRes").innerHTML = `
-    <tr><th>Total oils</th><td>${oilsForNa.toFixed(1)} g</td></tr>
-    ${rows.map(([n,g])=>`<tr><th>&nbsp;&nbsp;• ${n}</th><td>${g.toFixed(1)} g</td></tr>`).join('')}
-    <tr><th>NaOH</th><td>${naAvail.toFixed(1)} g</td></tr>
-    <tr><th>Water (@ ${ratio})</th><td>${water.toFixed(1)} g</td></tr>
-    <tr><th>FO (3%)</th><td>${fo.toFixed(1)} g</td></tr>
-    <tr><th><b>Estimated batch</b></th><td><b>${batch.toFixed(1)} g</b></td></tr>
-  `;
-}
-
-/* ========= COSTING ========= */
-const priceDB={};
-function renderCostTable(rows, extras){
-  const host=$("#costWrap"); host.innerHTML="";
-  rows.forEach(([name,g])=>{
-    const row=document.createElement("div"); row.className="row3";
-    row.innerHTML=`
-      <div><label>${name} — package cost ($)</label><input type="number" step="0.01" id="cost_${cssId(name)}" value="${priceDB[name]?.cost||0}"></div>
-      <div><label>Package size (g)</label><input type="number" id="size_${cssId(name)}" value="${priceDB[name]?.size||0}"></div>
-      <div class="note" style="align-self:end">Used: <b>${g.toFixed(1)} g</b></div>`;
-    host.appendChild(row);
-  });
-  const fo=document.createElement("div"); fo.className="row3";
-  fo.innerHTML=`
-    <div><label>Fragrance/EO — package cost ($)</label><input type="number" step="0.01" id="cost_FO" value="${priceDB.FO?.cost||0}"></div>
-    <div><label>Package size (g)</label><input type="number" id="size_FO" value="${priceDB.FO?.size||0}"></div>
-    <div class="note" style="align-self:end">FO used: <b>${(extras?.fo||0).toFixed(1)} g</b></div>`;
-  host.appendChild(fo);
-}
-function calcCost(){
-  const rows = window._last?.rows||[];
-  let c=0;
-  rows.forEach(([n,g])=>{
-    const p={cost:+$(`#cost_${cssId(n)}`)?.value||0, size:+$(`#size_${cssId(n)}`)?.value||0};
-    priceDB[n]=p; if(p.size>0) c += (p.cost/p.size)*g;
-  });
-  const foCost={cost:+$("#cost_FO").value||0, size:+$("#size_FO").value||0}; priceDB.FO=foCost;
-  if(foCost.size>0) c += (foCost.cost/foCost.size)* (window._last?.fo||0);
-  const bars=+$("#barsCount").value||10, price=+$("#priceBar").value||0;
-  const perBar = c/(bars||1), margin = price? ((price - perBar)/price)*100 : 0;
-  $("#costSummary").innerHTML = `
-    <div>COGS (batch): <b>$${c.toFixed(2)}</b></div>
-    <div>COGS per bar: <b>$${perBar.toFixed(2)}</b></div>
-    <div>Price/bar: <b>$${price.toFixed(2)}</b></div>
-    <div>Gross margin: <b>${margin.toFixed(1)}%</b></div>`;
-}
-
-/* ========= SAVE/LOAD ========= */
-const KEY="BelLei_Recipes";
-function saveRecipe(){
-  const name=$("#recName").value?.trim(); if(!name) return alert("Give your recipe a name.");
-  const data=collectInputs(); const all=JSON.parse(localStorage.getItem(KEY)||"{}"); all[name]=data;
-  localStorage.setItem(KEY, JSON.stringify(all)); alert("Saved!");
-}
-function collectInputs(){
-  return {
-    oils:oilRows(), target:+$("#targetOils").value||0, profile:$("#profile").value,
-    lyeType:$("#lyeType").value, lyePurity:+$("#lyePurity").value||100, kohPurity:+$("#kohPurity").value||90, dualPct:+$("#dualPct").value||90,
-    sf:+$("#superfat").value||0, waterMode:$("#waterMode").value, waterParam:+$("#waterParam").value||2.5,
-    milkPct:+$("#milkPct").value||0, potMl:+$("#potMl").value||0,
-    adds:{fo:+$("#fragPct").value||0, sl:+$("#slPct").value||0, salt:+$("#saltPct").value||0, sugar:+$("#sugarPct").value||0, clay:+$("#clayPct").value||0, chel:+$("#chelPct").value||0}
-  };
-}
-function loadRecipe(){
-  const name=$("#recName").value?.trim(); if(!name) return alert("Type the recipe name to load.");
-  const all=JSON.parse(localStorage.getItem(KEY)||"{}"); const d=all[name]; if(!d) return alert("Not found.");
-  applyInputs(d); calculate();
-}
-function listRecipes(){
-  const all=JSON.parse(localStorage.getItem(KEY)||"{}"); const list=Object.keys(all);
-  $("#saveList").innerHTML = list.length? list.map(n=>`<div class="tag">${n}</div>`).join('') : `<div class="note">No saved recipes yet.</div>`;
-}
-function deleteRecipe(){
-  const name=$("#recName").value?.trim(); if(!name) return alert("Type the recipe name to delete.");
-  const all=JSON.parse(localStorage.getItem(KEY)||"{}"); delete all[name]; localStorage.setItem(KEY, JSON.stringify(all)); listRecipes(); alert("Deleted (if it existed).");
-}
-function applyInputs(d){
-  $("#targetOils").value=d.target||1000; $("#profile").value=d.profile||"PF45-30-15-10";
-  $("#lyeType").value=d.lyeType||"NaOH"; $("#lyePurity").value=d.lyePurity||100; $("#kohPurity").value=d.kohPurity||90; $("#dualPct").value=d.dualPct||90;
-  $("#superfat").value=d.sf||5; $("#waterMode").value=d.waterMode||"ratio"; $("#waterParam").value=d.waterParam||2.5;
-  $("#milkPct").value=d.milkPct||0; $("#potMl").value=d.potMl||0;
-  $("#fragPct").value=d.adds?.fo??3; $("#slPct").value=d.adds?.sl??0; $("#saltPct").value=d.adds?.salt??0; $("#sugarPct").value=d.adds?.sugar??0; $("#clayPct").value=d.adds?.clay??0; $("#chelPct").value=d.adds?.chel??0;
-  $("#oilBody").innerHTML=""; (d.oils||defaults.oils).forEach(([n,g])=>addOilRow(n,g));
-}
-
-/* ========= EXPORT / INSTALL ========= */
-function exportJSON(){
-  const payload={ts:new Date().toISOString(), inputs:collectInputs(), results:window._last||{}};
-  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
-  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="BelLeis_Recipe.json"; a.click();
-}
-let _deferredPrompt=null;
-window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); _deferredPrompt=e; $("#installBtn").classList.remove('hide'); $("#installLabel").textContent="Install App (available)"; });
-function installApp(){ if(_deferredPrompt){ _deferredPrompt.prompt(); }}
-
-/* ========= TABS ========= */
-document.querySelectorAll('.tab').forEach(t=>{
-  t.addEventListener('click', ()=>{
-    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-    t.classList.add('active');
-    const id=t.dataset.tab;
-    ["calc","lyelimited","cost","save","feedback","install"].forEach(sec=>{
-      const el=$("#"+sec); if(!el) return;
-      el.classList.toggle('hide', sec!==id && !(id==="install" && sec==="calc"));
-    });
-    if(id==="cost" && window._last?.rows) renderCostTable(window._last.rows,{fo:window._last.fo});
-  });
-});
-
-/* ========= INIT ========= */
-function quickMode(){
-  $("#modeTag").textContent="Quick Mode";
-  $("#potMl").value=defaults.potMl;
-  $("#oilBody").innerHTML=""; defaults.oils.forEach(o=>addOilRow(...o));
-}
-document.addEventListener('DOMContentLoaded', ()=>{
-  quickMode(); calculate();
-  // update water param label on mode change
-  $("#waterMode").addEventListener('change', ()=>{
-    const map={ratio:"Water : Lye", pctOil:"Water % of oils", pctSoln:"Lye conc %", master:"Master-batch %"};
-    $("#waterParamLbl").textContent = map[$("#waterMode").value]||"Water";
-  });
-  $("#lyeType").addEventListener('change', ()=>{
-    $("#dualBox").classList.toggle('hide', $("#lyeType").value!=="dual");
-  });
-  // service worker
-  if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
-});
-</script>
-</body>
-</html>
