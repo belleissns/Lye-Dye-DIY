@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+li<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -674,6 +674,19 @@ $('#installBtn')?.addEventListener('click', async ()=>{
 /* ===== Service worker ===== */
 if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{})); }
 }); // DOMContentLoaded
+<!-- your calculator HTML up here -->
+
+  <script>
+    // all your event listeners and functions
+    function calculateRecipe() {
+      console.log("Calculator running...");
+      // your logic
+    }
+
+    document.getElementById('calcBtn')?.addEventListener('click', calculateRecipe);
+  </script>
+</body>
+</html>
 </script>
 </body>
   </html>
