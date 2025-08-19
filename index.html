@@ -91,6 +91,42 @@
   <!-- CALCULATOR -->
   <section class="card grid" id="tab-calc">
     <h3 style="margin:0;color:var(--olive)">Calculator</h3>
+    <div class="row" style="margin:6px 0 12px">
+  <button class="btn" id="quickModeBtn" type="button">Quick Mode</button>
+  <button class="btn subtle" id="proModeBtn" type="button">Pro Mode</button>
+</div>
+
+<div id="quickMode" class="card" style="display:none;background:#fafdf7;border:2px solid #7F894B">
+  <div class="grid">
+    <label>Batch Size — total oils (g)
+      <input type="number" id="qm_oils" value="1000" />
+    </label>
+    <label>Recipe Profile
+      <select id="qm_profile">
+        <option value="palmFreeBalanced">Palm-Free Balanced (45/30/15/10)</option>
+        <option value="lardBalanced">Lard Balanced (Olive/Lard/Coconut/Shea/Castor)</option>
+      </select>
+    </label>
+    <label>Superfat (%)<input type="number" id="qm_sf" value="5" min="0" max="15"/></label>
+    <label>Water Mode
+      <select id="qm_waterMode">
+        <option value="ratio">Water : Lye ratio</option>
+        <option value="conc">Lye solution concentration %</option>
+      </select>
+    </label>
+    <div id="qm_ratio_wrap">
+      <label>Water : Lye<input type="number" id="qm_ratio" value="2.5" step="0.1"/></label>
+    </div>
+    <div id="qm_conc_wrap" style="display:none">
+      <label>Lye concentration (%)<input type="number" id="qm_conc" value="30" min="20" max="50"/></label>
+    </div>
+    <label>Fragrance / EO %<input type="number" id="qm_fo" value="3" step="0.1"/></label>
+    <div class="row">
+      <button class="btn" id="qm_build">Build This Recipe</button>
+    </div>
+    <div class="mini">Quick Mode fills the Oils table from your chosen profile. Switch to Pro to tweak every detail.</div>
+  </div>
+</div>
 
     <div class="card" style="background:#fff8f9;border:2px solid var(--rose)">
       <div class="row">
