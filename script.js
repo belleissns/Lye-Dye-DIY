@@ -1,134 +1,156 @@
-/* ====== LIGHTWEIGHT CONTROLLER FOR CALCULATOR MODE & VISIBILITY ====== */
-/* This file only orchestrates UI visibility, mode selection, and the
-   "Coming Soon" behavior. It relies on your existing calculate() etc. */
+/* ========= tiny DOM helpers ========= */
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => document.querySelectorAll(s);
 
-(function () {
-  const $ = (s) => document.querySelector(s);
+/* ========= Calculator Mode (product type) config ========= */
+const MODES = {
+  bar:        { label: "Bar Soap (NaOH)",   soap: true,  lye: "NaOH" },
+  liquid:     { label: "Liquid Soap (KOH)", soap: true,  lye: "KOH"  },
+  shampooBar: { label: "Shampoo Bar",       soap: false },
+  shampoo:    { label: "Shampoo (Liquid)",  soap: false },
+  lipBalm:    { label: "Lip Balm",          soap: false },
+  bodyButter: { label: "Body Butter",       soap: false },
+  sugarScrub: { label: "Sugar Scrub",       soap: false },
+  lotion:     { label: "Lotion",            soap: false },
+  laundry:    { label: "Laundry Soap",      soap: false },
+  dish:       { label: "Dish Soap",         soap: false }
+};
 
-  // Map of product options we support in the UI.
-  // Keys are the <option value=""> for #calcMode.
-  // Please match these values to the options you rendered in index.html.
-  const MODES = {
-    bar:       { label: "Bar Soap (NaOH)",    soap: true,  lye: "NaOH"  },
-    liquid:    { label: "Liquid Soap (KOH)",  soap: true,  lye: "KOH"   },
-    shampooBar:{ label: "Shampoo Bar",        soap: false },
-    shampoo:   { label: "Shampoo (Liquid)",   soap: false },
-    lipBalm:   { label: "Lip Balm",           soap: false },
-    bodyButter:{ label: "Body Butter",        soap: false },
-    sugarScrub:{ label: "Sugar Scrub",        soap: false },
-    lotion:    { label: "Lotion",             soap: false },
-    laundry:   { label: "Laundry Soap",       soap: false },
-    dish:      { label: "Dish Soap",          soap: false },
-    castile:   { label: "Castile (100% OO)",  soap: true,  lye: "NaOH"  }, // optional alias
-  };
+/* ========= Coming Soon banner ========= */
+const COMING_SOON_HTML = `
+  <tr><td colspan="2" style="padding:12px 6px">
+    <div style="border:1px dashed #e5e7eb;background:#fffaf4;padding:14px;border-radius:12px;
+                font-size:14px;line-height:1.5;text-align:center">
+      <div style="font-weight:800;margin-bottom:6px">Coming Soon</div>
+      <div>Just like a perfectly cured bar of Cold Process Soap,<br>
+      this page has to sit for a few weeks before being ready. <b>COMING SOON!</b></div>
+    </div>
+  </td></tr>`;
 
-  // Friendly banner for “coming soon” products
-  const COMING_SOON_HTML = `
-    <tr><td colspan="2" style="padding:12px 6px">
-      <div style="
-        border:1px dashed #e5e7eb; background:#fffaf4; padding:14px; border-radius:12px;
-        font-size:14px; line-height:1.5; text-align:center">
-        <div style="font-weight:800; margin-bottom:6px">Coming Soon</div>
-        <div>Just like a perfectly cured bar of Cold Process Soap,<br>
-        this page has to sit for a few weeks before being ready. <b>COMING SOON!</b></div>
-      </div>
-    </td></tr>`;
+/* ========= Tabs controller ========= */
+(function tabsController(){
+  const sectionIds = ['calc','lyelimited','cost','save','feedback'];
 
-  // Cache references (guard for missing nodes so we don’t crash)
-  const modeSelect   = $("#calcMode");   // your “Calculator Mode” dropdown
-  const modeTag      = $("#modeTag");    // the little pill in the header
-  const profileSel   = $("#profile");    // the recipe style/profile select
-  const applyBtn     = $("#applyBtn");
-  const scaleBtn     = $("#scaleBtn");
-  const pctBtn       = $("#pctBtn");     // percent mode toggle
-  const lyeTypeSel   = $("#lyeType");    // NaOH / KOH / dual
-  const calcBtn      = $("#calcBtn");
-  const resTable     = $("#resTable");
+  function showTab(id){
+    // hide/show sections
+    sectionIds.forEach(sec=>{
+      const el = $('#'+sec);
+      if(el) el.classList.toggle('hide', sec !== id);
+    });
+    // active tab pill + aria
+    $$('.tab').forEach(tab=>{
+      const isActive = tab.dataset.tab === id;
+      tab.classList.toggle('active', isActive);
+      tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
 
-  // Helper: find a sensible “block” to hide for profiles (label+select+controls)
-  function profileBlock() {
-    // Try a few reasonable ancestors to group the profile parts
-    if (!profileSel) return null;
-    // Go up to the closest direct container grid cell
-    let node = profileSel.closest("div");
-    // Include its controls row (apply/scale/pct) if present
-    return node || profileSel.parentElement;
+    // optional: when entering Cost, refresh table if available
+    if(id==='cost' && window._last?.rows && typeof window.renderCostTable==='function'){
+      window.renderCostTable(window._last.rows, {fo: window._last.fo});
+    }
   }
 
-  // Show/hide the profile UI depending on mode
-  function setProfileVisibility(visible) {
+  document.addEventListener('DOMContentLoaded', ()=>{
+    // default to Calculator
+    showTab('calc');
+
+    // rename the Lye tab heading if needed
+    const lyHdr = $('#lyelimited h2');
+    if(lyHdr && /Lye-?Limited/i.test(lyHdr.textContent)) lyHdr.textContent = 'Batch by Available Lye';
+
+    // wire clicks
+    $$('.tab').forEach(tab=>{
+      tab.addEventListener('click', ()=>{
+        const id = tab.dataset.tab;
+        // the "install" tab is just a CTA; keep calc visible
+        showTab(id === 'install' ? 'calc' : id);
+      });
+    });
+  });
+})();
+
+/* ========= Mode controller (product type awareness) ========= */
+(function modeController(){
+  const modeSelect = $('#calcMode');     // Product type dropdown
+  const profileSel = $('#profile');      // Recipe style/profile (soap-only)
+  const applyBtn   = $('#applyBtn');
+  const scaleBtn   = $('#scaleBtn');
+  const pctBtn     = $('#pctBtn');
+  const lyeTypeSel = $('#lyeType');      // NaOH / KOH / dual
+  const resTable   = $('#resTable');     // results table body
+  const calcBtn    = $('#calcBtn');
+  const modeTag    = $('#modeTag');      // little chip in Calculator header
+
+  // find a block that wraps profile + its controls
+  function profileBlock(){
+    if(!profileSel) return null;
+    const cell = profileSel.closest('div') || profileSel.parentElement;
+    return cell;
+  }
+  function setProfileVisibility(visible){
     const block = profileBlock();
-    if (block) block.classList.toggle("hide", !visible);
-    if (applyBtn) applyBtn.classList.toggle("hide", !visible);
-    if (scaleBtn) scaleBtn.classList.toggle("hide", !visible);
-    if (pctBtn)   pctBtn.classList.toggle("hide", !visible);
+    if(block) block.classList.toggle('hide', !visible);
+    if(applyBtn) applyBtn.classList.toggle('hide', !visible);
+    if(scaleBtn) scaleBtn.classList.toggle('hide', !visible);
+    if(pctBtn)   pctBtn.classList.toggle('hide', !visible);
   }
 
-  // When switching modes, configure lye type and what’s visible
-  function applyMode(modeKey) {
+  function applyMode(modeKey){
     const cfg = MODES[modeKey];
-    if (!cfg) return;
+    if(!cfg) return;
 
-    // Update the header chip label
-    if (modeTag) modeTag.textContent = cfg.label || "Calculator";
+    if(modeTag) modeTag.textContent = cfg.label || 'Calculator';
 
-    // If it’s a soap mode, show profile and set lye type; else hide profile
+    // Soap modes show recipe style; others hide it
     setProfileVisibility(!!cfg.soap);
 
-    if (cfg.soap && cfg.lye && lyeTypeSel) {
-      lyeTypeSel.value = cfg.lye; // "NaOH" or "KOH"
-      // Trigger any dependent UI changes (dual box visibility etc.)
-      const evt = new Event("change", { bubbles: true });
-      lyeTypeSel.dispatchEvent(evt);
+    // Force the correct lye type for soaps
+    if(cfg.soap && cfg.lye && lyeTypeSel){
+      lyeTypeSel.value = cfg.lye;                  // "NaOH" or "KOH"
+      lyeTypeSel.dispatchEvent(new Event('change', {bubbles:true}));
     }
 
-    // For non-soap modes, clear results area to the banner
-    if (!cfg.soap && resTable) {
+    // For non-soap modes, show the coming-soon banner immediately
+    if(!cfg.soap && resTable){
       resTable.innerHTML = COMING_SOON_HTML;
     }
   }
 
-  // Intercept Calculate: if not a soap mode, just show banner
-  function onCalculateClicked(e) {
-    try {
+  function onCalculateClicked(e){
+    try{
       const key = modeSelect?.value;
       const cfg = key && MODES[key];
+      if(!cfg) return;                // unknown → let existing handlers run
 
-      if (!cfg) return; // unknown: fall through to existing calculate()
-
-      if (!cfg.soap) {
-        if (resTable) resTable.innerHTML = COMING_SOON_HTML;
-        // Don’t run the soap math
+      if(!cfg.soap){
+        // Intercept: show banner instead of soap math
+        if(resTable) resTable.innerHTML = COMING_SOON_HTML;
         return;
       }
-      // Otherwise, let your real calculate() run (already wired in your page)
-      if (typeof window.calculate === "function") {
+      // Soap → run your existing calculate() if present
+      if(typeof window.calculate === 'function'){
         window.calculate();
       }
-    } catch {
-      // Never hard-crash on click
+    }catch(err){
+      // never crash UI
+      console.info('calculate intercept skipped:', err?.message || err);
     }
   }
 
-  // Wire events once DOM is ready
-  document.addEventListener("DOMContentLoaded", () => {
-    // Guard: if there’s no selector in this build, abort quietly
-    if (!modeSelect) return;
+  document.addEventListener('DOMContentLoaded', ()=>{
+    if(!modeSelect) return;
 
-    // Initialize current mode
-    const initial = modeSelect.value || "bar";
-    applyMode(initial);
+    // initialize with current selection (default to Bar Soap)
+    applyMode(modeSelect.value || 'bar');
 
-    // React to mode changes
-    modeSelect.addEventListener("change", () => {
-      applyMode(modeSelect.value || "bar");
+    // react to mode changes
+    modeSelect.addEventListener('change', ()=>{
+      applyMode(modeSelect.value || 'bar');
     });
 
-    // Intercept Calculate button to respect placeholder modes
-    if (calcBtn) {
-      // Remove any previous listener (in case of hot reload)
-      calcBtn.removeEventListener("click", onCalculateClicked);
-      calcBtn.addEventListener("click", (e) => {
+    // intercept Calculate button to support Coming Soon products
+    if(calcBtn){
+      calcBtn.addEventListener('click', (e)=>{
         e.preventDefault();
         onCalculateClicked(e);
       });
