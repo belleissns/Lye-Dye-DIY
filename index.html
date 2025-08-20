@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Lye, Dye, and DIY — Bel Lei’s Soap Calculator (β)</title>
+<title>Lye, Dye, and DIY — Bel Lei’s Soap Calculator (v0.6 RESTORE+product)</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -15,30 +15,23 @@
   --ok:#10b981; --warn:#f59e0b; --danger:#ef4444;
   --ring:0 0 0 3px rgba(152,39,59,.18);
 }
-:root[data-theme="dark"]{
-  --ink:#e5e7eb; --muted:#a1a1aa; --bg:#121214; --panel:#1b1b1f;
-  --brand:#f26b85; --brand2:#f7707e; --ring:0 0 0 3px rgba(242,107,133,.18);
-}
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial}
-header{background:linear-gradient(90deg,var(--brand),var(--brand2));color:#fff;padding:16px 12px}
-h1{margin:0 0 2px;font-size:24px;letter-spacing:.2px}
-.small{opacity:.92;font-size:13px}
-.container{max-width:1050px;margin:14px auto;padding:0 12px}
-.card{background:var(--panel);border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.08);padding:14px}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial}
+header{background:linear-gradient(90deg,var(--brand),var(--brand2));color:#fff;padding:18px 14px}
+h1{margin:0 0 4px;font-size:26px;letter-spacing:.3px}
+.small{opacity:.9;font-size:13px}
+.container{max-width:1000px;margin:14px auto;padding:0 12px}
+.card{background:var(--panel);border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.06);padding:14px}
 .grid{display:grid;gap:12px}
 .controls{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 12px}
 .btn{background:var(--brand);color:#fff;border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
-.btn.subtle{background:transparent;border:1px solid #e5e7eb;color:var(--ink)}
-:root[data-theme="dark"] .btn.subtle{border-color:#333}
+.btn.subtle{background:#fff;border:1px solid #e5e7eb;color:var(--ink)}
 .btn.alt{background:var(--olive);color:#fff}
-.btn.ghost{background:transparent;border:none;color:var(--ink)}
 .btn:focus{outline:none;box-shadow:var(--ring)}
 .tabbar{display:flex;gap:8px;flex-wrap:wrap}
-.tab{background:transparent;border:1px solid #e5e7eb;border-radius:999px;padding:8px 12px;cursor:pointer}
+.tab{background:#fff;border:1px solid #e5e7eb;border-radius:999px;padding:8px 12px;cursor:pointer}
 .tab.active{background:var(--brand);color:#fff;border-color:var(--brand)}
-input,select,textarea{width:100%;padding:12px;border:1px solid #e5e7eb;border-radius:10px;background:#fff;color:#111}
-:root[data-theme="dark"] input,:root[data-theme="dark"] select,:root[data-theme="dark"] textarea{background:#111;border-color:#333;color:#e5e7eb}
+input,select{width:100%;padding:12px;border:1px solid #e5e7eb;border-radius:10px;background:#fff}
 label{font-weight:700;font-size:14px;margin-bottom:6px;display:block}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
@@ -51,158 +44,34 @@ label{font-weight:700;font-size:14px;margin-bottom:6px;display:block}
 .table th,.table td{padding:8px;border-bottom:1px solid #eee;text-align:left;font-size:14px}
 .kpi{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
 .kpi > div{background:#f9fafb;border:1px solid #eef2f7;border-radius:10px;padding:8px 10px;font-size:13px}
-:root[data-theme="dark"] .kpi > div{background:#111;border-color:#252525}
 .section-title{display:flex;align-items:center;justify-content:space-between;margin:6px 0 8px}
-.tag{background:transparent;border:1px solid #e5e7eb;padding:5px 8px;border-radius:8px;font-size:12px}
+.tag{background:#fff;border:1px solid #e5e7eb;padding:5px 8px;border-radius:8px;font-size:12px}
 fieldset{border:none;margin:0;padding:0}
 legend{font-weight:800;margin-bottom:6px}
 .hide{display:none!important}
 .stickyCalc{position:sticky;bottom:10px;z-index:5}
-hr{border:0;border-top:1px solid #ececec;margin:6px 0}
 @media (max-width:760px){
   .row,.row3{grid-template-columns:1fr}
-  header{padding:14px 10px}
-  h1{font-size:20px}
-  .controls{gap:6px}
+  header{padding:16px 12px}
+  h1{font-size:22px}
 }
 @media print{
-  header,.tabbar,.controls .btn,#installBtn,#themeBtn{display:none!important}
+  header,.tabbar,.controls .btn,#installBtn{display:none!important}
   body{background:#fff}
   .card{box-shadow:none;border:1px solid #ddd}
 }
-
-/* Beginner vs Advanced */
-.only-advanced{display:none}
-body.show-advanced .only-advanced{display:block}
-body.show-advanced #beginnerCard{display:none}
-
-/* Tooltip (very light-weight) */
-.tip{position:relative; display:inline-flex; align-items:center; gap:6px}
-.tip [data-tip]{border-bottom:1px dashed currentColor; cursor:help}
-.tip .bubble{
-  position:absolute; left:0; top:120%; min-width:240px; max-width:360px;
-  background:#111; color:#fff; border-radius:10px; padding:10px; font-size:12.5px;
-  box-shadow:0 4px 16px rgba(0,0,0,.25); display:none; z-index:5
-}
-:root[data-theme="dark"] .tip .bubble{background:#1f1f24}
-.tip:hover .bubble{display:block}
 </style>
 </head>
 <body>
 <header>
-  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-    <div>
-      <h1>Lye, Dye, and DIY</h1>
-      <div class="small">Bel Lei’s Soaps N Stuffs • Beginner-friendly, pro-accurate calculator (β)</div>
-    </div>
-    <div class="controls" style="margin:0">
-      <button class="btn subtle" id="themeBtn" title="Toggle theme">Theme</button>
-      <button class="btn subtle" id="toggleModeBtn" aria-pressed="true">Switch to Advanced</button>
-    </div>
-  </div>
+  <h1>Lye, Dye, and DIY</h1>
+  <div class="small">Bel Lei’s Soaps N Stuffs • Beginner-friendly, pro-accurate calculator (v0.6)</div>
 </header>
 
 <div class="container grid">
 
-  <!-- BEGINNER (Simple Mode) -->
-  <section class="card grid" id="beginnerCard" aria-label="Beginner Mode">
-    <div class="section-title">
-      <h2 style="margin:0">Simple Mode</h2>
-      <span class="tag">Step-by-step</span>
-    </div>
-
-    <fieldset>
-      <legend>1) Batch size</legend>
-      <div class="row">
-        <div>
-          <label for="b_target">Total oils (g)</label>
-          <input id="b_target" type="number" inputmode="decimal" value="1000" min="100" step="50">
-          <div class="note">Common: 750 • 1000 • 1400 g</div>
-        </div>
-      </div>
-    </fieldset>
-
-    <fieldset>
-      <legend>2) Choose a style</legend>
-      <div class="row">
-        <div>
-          <label for="b_style">Recipe style</label>
-          <select id="b_style">
-            <option value="PF45-30-15-10">Balanced (palm-free)</option>
-            <option value="hard40">Hard & long-lasting</option>
-            <option value="bubbles">Bubbly</option>
-          </select>
-          <div class="note">Fine-tune oils in Advanced.</div>
-        </div>
-      </div>
-    </fieldset>
-
-    <fieldset>
-      <legend>3) Superfat & Water</legend>
-      <div class="row">
-        <div class="tip">
-          <div style="width:100%">
-            <label for="b_sf">Superfat (%)</label>
-            <input id="b_sf" type="number" value="5" min="3" max="8" step="1">
-            <div class="note">Typical: 3–8%</div>
-          </div>
-          <span data-tip>Why?</span>
-          <div class="bubble">Superfat leaves extra oils unsaponified for mildness. Too low can feel drying; too high can feel greasy or soft.</div>
-        </div>
-        <div class="tip">
-          <div style="width:100%">
-            <label for="b_water">Water choice</label>
-            <select id="b_water">
-              <option value="ratio:2.5">Water:lye 2.5 (general)</option>
-              <option value="ratio:2.3">Water:lye 2.3 (faster trace)</option>
-              <option value="ratio:2.7">Water:lye 2.7 (slower trace)</option>
-              <option value="pctSoln:33">33% lye solution (“sweet spot”)</option>
-            </select>
-            <div class="note">Advanced lets you set any method/value.</div>
-          </div>
-          <span data-tip>What’s this?</span>
-          <div class="bubble">Lower water (stronger lye solution) traces faster & unmolds sooner; higher water traces slower & stays fluid longer.</div>
-        </div>
-      </div>
-    </fieldset>
-
-    <fieldset>
-      <legend>4) Optional fragrance</legend>
-      <div class="row">
-        <div>
-          <label for="b_foType">Type</label>
-          <select id="b_foType">
-            <option value="FO">Fragrance Oil (general)</option>
-            <option value="EO-Peppermint">Peppermint EO</option>
-            <option value="EO-Lavender">Lavender EO</option>
-            <option value="EO-CinnamonBark">Cinnamon Bark EO</option>
-            <option value="EO-CloveBud">Clove Bud EO</option>
-          </select>
-          <div class="note" id="b_foTip"></div>
-        </div>
-        <div>
-          <label for="b_foPct">Use % of oils</label>
-          <input id="b_foPct" type="number" value="3" step="0.1" min="0" max="4.5">
-          <div class="note">Capped automatically to safe max.</div>
-        </div>
-      </div>
-    </fieldset>
-
-    <div class="controls stickyCalc">
-      <button class="btn" id="b_calcBtn">Calculate</button>
-      <button class="btn subtle" id="b_showAdvancedBtn">Show Advanced</button>
-    </div>
-
-    <section class="card" id="b_results" style="border:1px dashed #eee">
-      <h3 style="margin:6px 0 10px">Results</h3>
-      <table class="table" id="b_resTable"></table>
-      <div class="kpi" id="b_badges"></div>
-      <div class="kpi" id="b_yield"></div>
-    </section>
-  </section>
-
-  <!-- ADVANCED (unchanged power panels, just hidden by default) -->
-  <div class="tabbar only-advanced" role="tablist" aria-label="sections">
+  <!-- tabs -->
+  <div class="tabbar" role="tablist" aria-label="sections">
     <div class="tab active" data-tab="calc">Calculator</div>
     <div class="tab" data-tab="lyelimited">Lye-Limited</div>
     <div class="tab" data-tab="cost">Cost & Profit</div>
@@ -212,36 +81,40 @@ body.show-advanced #beginnerCard{display:none}
   </div>
 
   <!-- CALC -->
-  <section class="card grid only-advanced" id="calc" role="tabpanel" aria-labelledby="calc-tab">
+  <section class="card grid" id="calc" role="tabpanel" aria-labelledby="calc-tab">
     <div class="section-title">
-      <!-- Add this just under the section-title in #calc -->
-<div class="row" id="productRow">
-  <div>
-    <label for="productType">Product</label>
-    <select id="productType">
-    <span class="tag" id="modeTag">Bar Soap</span>
-      <option value="liquid">Liquid Body Soap (KOH)</option>
-      <option value="dish">Dish Soap (KOH)</option>
-      <option value="laundry">Laundry Soap (NaOH)</option>
-      <option value="lipbalm">Lip Balm (no lye)</option>
-      <option value="bodybutter">Body Butter (no lye)</option>
-      <option value="lotion">Body Lotion (no lye)</option>
-    </select>
-  </div>
-  <div>
-    <div class="note" id="productNote" style="margin-top:28px">
-      Bar Soap uses NaOH. Liquid/Dish use KOH. Non-lye items hide lye fields.
-    </div>
-  </div>
-</div><h2 style="margin:0">Calculator</h2>
-      <span class="tag" id="modeTag">Advanced Mode</span>
+      <h2 style="margin:0">Calculator</h2>
+      <!-- REPLACED: now has id so JS can update -->
+      <span class="tag" id="modeTag">Bar Soap</span>
     </div>
 
+    <!-- NEW: Product selector row -->
+    <div class="row" id="productRow">
+      <div>
+        <label for="productType">Product</label>
+        <select id="productType">
+          <option value="bar">Bar Soap (NaOH)</option>
+          <option value="liquid">Liquid Body Soap (KOH)</option>
+          <option value="dish">Dish Soap (KOH)</option>
+          <option value="laundry">Laundry Soap (NaOH)</option>
+          <option value="lipbalm">Lip Balm (no lye)</option>
+          <option value="bodybutter">Body Butter (no lye)</option>
+          <option value="lotion">Body Lotion (no lye)</option>
+        </select>
+      </div>
+      <div>
+        <div class="note" id="productNote" style="margin-top:28px">
+          Bar Soap uses NaOH. Liquid/Dish use KOH. Non-lye items hide lye fields.
+        </div>
+      </div>
+    </div>
+
+    <!-- targets -->
     <div class="row">
       <div>
         <label for="targetOils">Desired total oils (<span id="uLabel">g</span>)</label>
         <input id="targetOils" type="number" inputmode="decimal" value="1000">
-        <div class="note">Tip: 750 • 1000 • 1400. <b>Units:</b> <a href="#" id="unitToggle">grams</a> / ounces</div>
+        <div class="note">Tip: Enter 750 • 1000 • 1400. <b>Units:</b> <a href="#" id="unitToggle">grams</a> / ounces</div>
       </div>
       <div>
         <label for="profile">Recipe profile</label>
@@ -258,6 +131,7 @@ body.show-advanced #beginnerCard{display:none}
       </div>
     </div>
 
+    <!-- oil editor -->
     <fieldset>
       <legend>Oils & Butters</legend>
       <table class="table" id="oilTable">
@@ -270,6 +144,7 @@ body.show-advanced #beginnerCard{display:none}
       </div>
     </fieldset>
 
+    <!-- lye/water -->
     <fieldset class="grid">
       <legend>Lye & Water</legend>
       <div class="row3">
@@ -300,7 +175,7 @@ body.show-advanced #beginnerCard{display:none}
           <label for="superfat">Superfat / Lye discount (%)</label>
           <input id="superfat" type="number" value="5">
         </div>
-        <div class="note" style="align-self:end">Tip: 3–8% is common.</div>
+        <div class="note" style="align-self:end">Beginner tip: 3–8% is common.</div>
       </div>
 
       <div class="row3">
@@ -351,6 +226,7 @@ body.show-advanced #beginnerCard{display:none}
       </div>
     </fieldset>
 
+    <!-- additives -->
     <fieldset>
       <legend>Additives (% of oils unless noted)</legend>
       <div class="row3">
@@ -383,6 +259,7 @@ body.show-advanced #beginnerCard{display:none}
       <div class="kpi" id="additiveBadges"></div>
     </fieldset>
 
+    <!-- sticky calculate -->
     <div class="controls stickyCalc">
       <button class="btn" id="calcBtn">Calculate</button>
       <button class="btn subtle" id="printBtn">Print</button>
@@ -390,18 +267,18 @@ body.show-advanced #beginnerCard{display:none}
       <button class="btn alt hide" id="installBtn">Install App</button>
     </div>
 
+    <!-- results -->
     <section class="card" id="results" style="border:1px dashed #eee">
       <h3 style="margin:6px 0 10px">Batch Results</h3>
       <div class="grid">
         <table class="table" id="resTable"></table>
         <div class="kpi" id="safetyBadges"></div>
-        <div class="kpi" id="yieldRow"></div>
       </div>
     </section>
   </section>
 
   <!-- LYE-LIMITED -->
-  <section class="card grid hide only-advanced" id="lyelimited" role="tabpanel">
+  <section class="card grid hide" id="lyelimited" role="tabpanel">
     <h2 style="margin:0">Lye-Limited Mode</h2>
     <div class="row3">
       <div><label for="availLye">How much NaOH (g) do you have?</label><input id="availLye" type="number" value="200"></div>
@@ -424,7 +301,7 @@ body.show-advanced #beginnerCard{display:none}
   </section>
 
   <!-- COST -->
-  <section class="card grid hide only-advanced" id="cost" role="tabpanel">
+  <section class="card grid hide" id="cost" role="tabpanel">
     <h2 style="margin:0">Cost & Profit</h2>
     <div id="costWrap" class="grid"></div>
     <div class="row3">
@@ -436,7 +313,7 @@ body.show-advanced #beginnerCard{display:none}
   </section>
 
   <!-- SAVE/LOAD -->
-  <section class="card grid hide only-advanced" id="save" role="tabpanel">
+  <section class="card grid hide" id="save" role="tabpanel">
     <h2 style="margin:0">Save / Load</h2>
     <div class="row">
       <div><label>Recipe name</label><input id="recName" placeholder="e.g., Charcoal Mint CP"></div>
@@ -451,7 +328,7 @@ body.show-advanced #beginnerCard{display:none}
   </section>
 
   <!-- FEEDBACK -->
-  <section class="card grid hide only-advanced" id="feedback" role="tabpanel">
+  <section class="card grid hide" id="feedback" role="tabpanel">
     <h2 style="margin:0">Feedback</h2>
     <p class="note">Beta testers: write notes and include Export JSON with your report so we can replay your inputs.</p>
     <textarea id="fb" rows="6" style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:10px"></textarea>
@@ -459,10 +336,8 @@ body.show-advanced #beginnerCard{display:none}
   </section>
 
 </div>
-
 <script>
-/* === CORE ENGINE === */
-  /* ========= DATA ========= */
+/* ========= DATA ========= */
 const SAP_NaOH = {
   "Olive Oil (pure)":0.134, "Coconut Oil 76°":0.183, "Avocado Oil":0.133,
   "Lard":0.141, "Shea Butter (raw)":0.128, "Castor Oil":0.128
@@ -487,21 +362,69 @@ const FO_RULES = {
 let percentMode = false;
 let useOz = false;
 
+/* ========= PRODUCT TYPES ========= */
+const PRODUCTS = {
+  bar:       { name:"Bar Soap",           lye:"NaOH", showLye:true,  allowDual:true,  koh:false,  note:"Classic CP/HP bar soap with NaOH." },
+  liquid:    { name:"Liquid Body Soap",   lye:"KOH",  showLye:true,  allowDual:true,  koh:true,   note:"Liquid soap uses KOH; dual-lye optional." },
+  dish:      { name:"Dish Soap",          lye:"KOH",  showLye:true,  allowDual:false, koh:true,   note:"Usually 100% KOH for high cleansing." },
+  laundry:   { name:"Laundry Soap",       lye:"NaOH", showLye:true,  allowDual:false, koh:false,  note:"Bar/flake style. Higher cleansing oils okay." },
+  lipbalm:   { name:"Lip Balm",           lye:null,   showLye:false, allowDual:false, koh:false,  note:"No lye. We’ll hide lye/water and show balm ratios." },
+  bodybutter:{ name:"Body Butter",        lye:null,   showLye:false, allowDual:false, koh:false,  note:"No lye. Oil/butter blend percentages." },
+  lotion:    { name:"Body Lotion",        lye:null,   showLye:false, allowDual:false, koh:false,  note:"No lye. Water-in-oil or oil-in-water emulsion." }
+};
+
 /* ========= HELPERS ========= */
 const $=s=>document.querySelector(s);
+const $$=s=>document.querySelectorAll(s);
 function oz(n){return n/28.349523125}
 function g(n){return n*28.349523125}
-function unitLabel(){ $("#uLabel")?.textContent = useOz?'oz':'g'; $("#wtHdr")?.textContent = `Weight (${useOz?'oz':'g'})`; }
+function unitLabel(){ $("#uLabel").textContent = useOz?'oz':'g'; $("#wtHdr").textContent = `Weight (${useOz?'oz':'g'})`; }
 function parseByUnit(v){ const n=parseFloat(v)||0; return useOz ? g(n) : n; }
 function badge(level,text){const c=level==="ok"?"b-ok":level==="warn"?"b-warn":"b-danger";return `<span class="badge ${c}">${text}</span>`;}
 function sum(arr){return arr.reduce((s,x)=>s+x,0)}
 function cssId(n){return n.replace(/[^a-z0-9]/gi,'_')}
 function debounce(fn, ms=160){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }}
 
+/* ========= PRODUCT SWITCHER ========= */
+function setProductType(key){
+  const cfg = PRODUCTS[key] || PRODUCTS.bar;
+
+  // Update tag and note
+  $("#modeTag").textContent = cfg.name;
+  $("#productNote").textContent = cfg.note;
+
+  // Show/hide lye fieldset
+  const lyeFieldset = document.querySelector('fieldset.grid');
+  if(lyeFieldset){ lyeFieldset.classList.toggle('hide', !cfg.showLye); }
+
+  // Lye dropdown options per product
+  const lyeTypeSel = $("#lyeType");
+  if(cfg.showLye && lyeTypeSel){
+    const opts=[];
+    if(cfg.lye === "NaOH" || !cfg.koh) opts.push(`<option value="NaOH">NaOH (bar soap)</option>`);
+    if(cfg.koh)                         opts.push(`<option value="KOH">KOH (liquid soap)</option>`);
+    if(cfg.allowDual)                   opts.push(`<option value="dual">Dual-lye (split)</option>`);
+    lyeTypeSel.innerHTML = opts.join('');
+    lyeTypeSel.value = cfg.lye || "NaOH";
+    $("#dualBox").classList.toggle('hide', lyeTypeSel.value!=="dual");
+  }
+
+  // Non-lye products: override Calculate to helpful message
+  const calcBtn = $("#calcBtn"), resTable=$("#resTable");
+  if(!cfg.showLye){
+    calcBtn.onclick = ()=>{ resTable.innerHTML = `
+      <tr><th>Heads up</th>
+      <td>This product type doesn’t use lye. A dedicated ${cfg.name} calculator is coming next. Use Oils/Additives to plan weights; then Print/Export.</td></tr>`; };
+  }else{
+    calcBtn.onclick = calculate;
+  }
+
+  if(cfg.showLye) calculate();
+}
+
 /* ========= OILS TABLE ========= */
 function oilRows(){
-  const host=$("#oilBody"); if(!host) return [];
-  return [...host.children].map(tr=>{
+  return [...$("#oilBody").children].map(tr=>{
     const name = tr.querySelector("select").value;
     const v = parseFloat(tr.querySelector("input").value||0);
     return [name, v];
@@ -509,7 +432,9 @@ function oilRows(){
 }
 function oilsAsGrams(){
   const rows = oilRows();
-  if(!percentMode){ return rows.map(([n,v])=> [n, parseByUnit(v)]); }
+  if(!percentMode){
+    return rows.map(([n,v])=> [n, parseByUnit(v)]);
+  }
   const target = parseByUnit($("#targetOils").value||0);
   return rows.map(([n,p])=> [n, target * ((+p||0)/100) ]);
 }
@@ -519,16 +444,13 @@ function addOilRow(name="", val=0){
     <td><select>${OILS.map(k=>`<option ${k===name?'selected':''}>${k}</option>`).join('')}</select></td>
     <td><input type="number" inputmode="decimal" value="${val? (percentMode? val : (useOz? oz(val).toFixed(2) : val)) : ''}"></td>
     <td><button class="btn subtle" type="button">Remove</button></td>`;
-  tr.querySelector("button").addEventListener('click', ()=>{ tr.remove(); liveUpdate?.(); });
-  $("#oilBody")?.appendChild(tr);
+  tr.querySelector("button").addEventListener('click', ()=>{ tr.remove(); liveUpdate(); });
+  $("#oilBody").appendChild(tr);
 }
 function updateOilTotals(){
   const rows = oilsAsGrams();
   const totG = sum(rows.map(r=>r[1]||0));
-  $("#oilTotals")?.replaceChildren();
-  const el=document.createElement('div');
-  el.innerHTML = `Total oils: <b>${totG.toFixed(1)} g</b> (${oz(totG).toFixed(2)} oz)`;
-  $("#oilTotals")?.appendChild(el);
+  $("#oilTotals").innerHTML = `<div>Total oils: <b>${totG.toFixed(1)} g</b> (${oz(totG).toFixed(2)} oz)</div>`;
 }
 
 /* ========= PROFILES / SCALING ========= */
@@ -540,8 +462,7 @@ function profilePercents(key){
 function applyProfile(){
   const tgtG = parseByUnit($("#targetOils").value||0);
   const plan = profilePercents($("#profile").value);
-  const body=$("#oilBody"); if(!body) return;
-  body.innerHTML="";
+  $("#oilBody").innerHTML="";
   if(percentMode){
     plan.forEach(([n,p])=> addOilRow(n, p));
   }else{
@@ -555,11 +476,10 @@ function applyProfile(){
 }
 function togglePctMode(){
   percentMode = !percentMode;
-  $("#pctBtn")?.textContent = `Percent mode: ${percentMode?'On':'Off'}`;
-  $("#wtHdr")?.textContent = percentMode? "Percent (%)" : `Weight (${useOz?'oz':'g'})`;
+  $("#pctBtn").textContent = `Percent mode: ${percentMode?'On':'Off'}`;
+  $("#wtHdr").textContent = percentMode? "Percent (%)" : `Weight (${useOz?'oz':'g'})`;
   const rows = oilsAsGrams();
-  const body=$("#oilBody"); if(!body) return;
-  body.innerHTML="";
+  $("#oilBody").innerHTML="";
   if(percentMode){
     const tgt = sum(rows.map(r=>r[1]||0)) || parseByUnit($("#targetOils").value||0);
     rows.forEach(([n,g])=> addOilRow(n, tgt? (g/tgt*100).toFixed(2) : 0));
@@ -572,15 +492,13 @@ function scaleToTarget(){
   const tgt = parseByUnit($("#targetOils").value||0);
   let rows = oilsAsGrams();
   if(percentMode){
-    const now = oilRows();
-    const totalPct = sum(now.map(r=>+r[1]||0))||100;
-    rows = now.map(([n,p],i)=> [n, i===now.length-1? (tgt - sum(now.slice(0,-1).map(([n2,p2])=> Math.round(tgt*(p2/totalPct))))) : Math.round(tgt*(p/totalPct)) ]);
+    const totalPct = sum(oilRows().map(r=>+r[1]||0))||100;
+    rows = oilRows().map(([n,p],i)=> [n, i===oilRows().length-1? (tgt - sum(oilRows().slice(0,-1).map(([n2,p2])=> Math.round(tgt*(p2/totalPct))))) : Math.round(tgt*(p/totalPct)) ]);
   }else{
     const cur = sum(rows.map(r=>r[1]||0))||1;
     rows = rows.map(([n,g])=> [n, g*tgt/cur]);
   }
-  const body=$("#oilBody"); if(!body) return;
-  body.innerHTML=""; rows.forEach(([n,g])=> addOilRow(n,g));
+  $("#oilBody").innerHTML=""; rows.forEach(([n,g])=> addOilRow(n,g));
   updateOilTotals(); calculate();
 }
 
@@ -588,10 +506,10 @@ function scaleToTarget(){
 function calcLyeFromOils(rows, sf, type){
   const baseNa = sum(rows.map(([n,g])=> g*(SAP_NaOH[n]||0)));
   const neededNa = baseNa*(1 - sf/100);
-  const naPur = +($("#lyePurity")?.value||100), koPur=+($("#kohPurity")?.value||90);
+  const naPur = +($("#lyePurity").value||100), koPur=+($("#kohPurity").value||90);
   if(type==='NaOH') return {na: neededNa*(100/Math.max(1,naPur)), ko:0};
   if(type==='KOH'){ const ko = neededNa*KOH_FACTOR*(100/Math.max(1,koPur)); return {na:0, ko}; }
-  const pctNa = (+($("#dualPct")?.value||90))/100;
+  const pctNa = (+$("#dualPct").value||90)/100;
   const na = neededNa*pctNa*(100/Math.max(1,naPur));
   const ko = (neededNa*(1-pctNa)*KOH_FACTOR)*(100/Math.max(1,koPur));
   return {na,ko};
@@ -603,7 +521,6 @@ function waterFromMode(mode,param,totalNaOH_g,totalOils_g){
   return totalNaOH_g*2.5;
 }
 function addPct(gOils,p){return gOils*(p/100)}
-
 /* ========= SAFETY ========= */
 function rangeBadge(val,min,max,label){
   if(val===0) return badge("ok",`${label}: 0 (unused)`);
@@ -615,7 +532,7 @@ function rangeBadge(val,min,max,label){
 /* ========= COSTING ========= */
 const priceDB={};
 function renderCostTable(rows, extras){
-  const host=$("#costWrap"); if(!host) return; host.innerHTML="";
+  const host=$("#costWrap"); host.innerHTML="";
   rows.forEach(([name,g])=>{
     const row=document.createElement("div"); row.className="row3";
     row.innerHTML=`
@@ -638,72 +555,52 @@ function calcCost(){
     const p={cost:+$(`#cost_${cssId(n)}`)?.value||0, size:+$(`#size_${cssId(n)}`)?.value||0};
     priceDB[n]=p; if(p.size>0) c += (p.cost/p.size)*g;
   });
-  const foCost={cost:+$("#cost_FO")?.value||0, size:+$("#size_FO")?.value||0}; priceDB.FO=foCost;
+  const foCost={cost:+$("#cost_FO").value||0, size:+$("#size_FO").value||0}; priceDB.FO=foCost;
   if(foCost.size>0) c += (foCost.cost/foCost.size)* (window._last?.fo||0);
-  const bars=+$("#barsCount")?.value||10, price=+$("#priceBar")?.value||0;
+  const bars=+$("#barsCount").value||10, price=+$("#priceBar").value||0;
   const perBar = c/(bars||1), margin = price? ((price - perBar)/price)*100 : 0;
-  $("#costSummary")?.replaceChildren();
-  const wrap=document.createElement('div');
-  wrap.innerHTML = `
+  $("#costSummary").innerHTML = `
     <div>COGS (batch): <b>$${c.toFixed(2)}</b></div>
     <div>COGS per bar: <b>$${perBar.toFixed(2)}</b></div>
     <div>Price/bar: <b>$${price.toFixed(2)}</b></div>
     <div>Gross margin: <b>${margin.toFixed(1)}%</b></div>`;
-  $("#costSummary")?.appendChild(wrap);
 }
 
-/* ========= RESULTS & YIELD ========= */
+/* ========= RESULTS ========= */
 function fragranceCap(type){ return FO_RULES[type]?.max ?? 4.5; }
 function concFrom(lye, water){ const conc = lye/(lye+water)*100; return isFinite(conc)?conc:0; }
-
-function estimateYieldBars(batchGrams){
-  // default “rule of thumb”: ~90–95% of batch ends as cut bars (losses, water loss pre-cut negligible here)
-  const usable = batchGrams*0.93;
-  // assume 4.5–5.0 oz bars (127–142 g); give range
-  const minBar=127, maxBar=142;
-  const lo = Math.max(1, Math.floor(usable/maxBar));
-  const hi = Math.max(1, Math.floor(usable/minBar));
-  return {lo, hi, usable};
-}
-
-function renderYieldRow(batch){
-  const y = estimateYieldBars(batch);
-  const html = `<div>Estimated bars: <b>${y.lo}–${y.hi}</b> (from ~${y.usable.toFixed(0)} g usable)</div>`;
-  $("#yieldRow")?.innerHTML = html;
-  $("#b_yield")?.html = html;
-}
 
 function calculate(){
   const rows = oilsAsGrams();
   const gOils = sum(rows.map(([_,g])=>g||0));
-  const sf = +$("#superfat")?.value||0;
-  const type=$("#lyeType")?.value||'NaOH';
+  const sf = +$("#superfat").value||0;
+  const type=$("#lyeType").value;
   const {na,ko} = calcLyeFromOils(rows,sf,type);
   const totalNaEq = na + (ko/KOH_FACTOR);
-  const water = waterFromMode($("#waterMode")?.value||'ratio', +($("#waterParam")?.value||2.5), totalNaEq, gOils);
+  const water = waterFromMode($("#waterMode").value, +$("#waterParam").value||2.5, totalNaEq, gOils);
 
-  const foType = $("#foType")?.value||'FO';
+  const foType = $("#foType").value;
   const foMax  = fragranceCap(foType);
-  const fragPct= +($("#fragPct")?.value||0);
-  const slPct  = +($("#slPct")?.value||0);
-  const saltPct= +($("#saltPct")?.value||0);
-  const sugarPct=+($("#sugarPct")?.value||0);
-  const clayPct= +($("#clayPct")?.value||0);
-  const chelPct= +($("#chelPct")?.value||0);
+  const fragPct= +($("#fragPct").value||0);
+  const slPct  = +($("#slPct").value||0);
+  const saltPct= +($("#saltPct").value||0);
+  const sugarPct=+($("#sugarPct").value||0);
+  const clayPct= +($("#clayPct").value||0);
+  const chelPct= +($("#chelPct").value||0);
 
   const fo=addPct(gOils,fragPct), sl=addPct(gOils,slPct), salt=addPct(gOils,saltPct),
         sugar=addPct(gOils,sugarPct), clay=addPct(gOils,clayPct), chel=addPct(gOils,chelPct);
-  const milk = water*((+($("#milkPct")?.value||0))/100);
+  const milk = water*((+$("#milkPct").value||0)/100);
 
   const batch = gOils + (na+ko) + water + fo + sl + salt + sugar + clay + chel;
 
-  const pot = +$("#potMl")?.value||0; const safeMin=pot*0.60, safeMax=pot*0.75;
+  const pot = +$("#potMl").value||0; const safeMin=pot*0.60, safeMax=pot*0.75;
 
-  const resHTML = `
+  $("#resTable").innerHTML = `
     <tr><th>NaOH (solid)</th><td>${na.toFixed(2)} g (${oz(na).toFixed(2)} oz)</td></tr>
     <tr><th>KOH (flakes)</th><td>${ko.toFixed(2)} g (${oz(ko).toFixed(2)} oz)</td></tr>
     <tr><th>Water (total)</th><td>${water.toFixed(2)} g (${oz(water).toFixed(2)} oz)</td></tr>
-    <tr><th>Milk portion</th><td>${milk.toFixed(2)} g (${(+($("#milkPct")?.value||0))}%)</td></tr>
+    <tr><th>Milk portion</th><td>${milk.toFixed(2)} g (${(+$("#milkPct").value||0)}%)</td></tr>
     <tr><th>Fragrance / EO</th><td>${fo.toFixed(2)} g (${fragPct}%)</td></tr>
     <tr><th>Sodium Lactate</th><td>${sl.toFixed(2)} g (${slPct}%)</td></tr>
     <tr><th>Salt</th><td>${salt.toFixed(2)} g (${saltPct}%)</td></tr>
@@ -713,22 +610,21 @@ function calculate(){
     <tr><th><b>Total batch weight</b></th><td><b>${batch.toFixed(1)} g</b> (${oz(batch).toFixed(2)} oz)</td></tr>
     ${pot?`<tr><th>Recommended pot fill (60–75%)</th><td>${safeMin.toFixed(0)}–${safeMax.toFixed(0)} g</td></tr>`:''}
   `;
-  $("#resTable")?.innerHTML = resHTML;
 
   const conc = concFrom(totalNaEq, water);
   const caps=[];
   if(conc<25) caps.push(badge("warn",`Lye conc ${conc.toFixed(1)}% (dilute → slow trace)`));
-  else if(conc<=28) caps.push(badge("ok",`Lye conc ${conc.toFixed(1)}% (on dilute side)`));
+  else if(conc<=27.9) caps.push(badge("ok",`Lye conc ${conc.toFixed(1)}% (on dilute side)`));
   else if(conc<=33) caps.push(badge("ok",`Lye conc ${conc.toFixed(1)}% sweet spot`));
   else if(conc<=38) caps.push(badge("warn",`Lye conc ${conc.toFixed(1)}% (strong → faster trace)`));
   else caps.push(badge("danger",`Lye conc ${conc.toFixed(1)}% (very strong)`));
 
-  const wm=$("#waterMode")?.value, wp=+($("#waterParam")?.value||2.5);
+  const wm=$("#waterMode").value, wp=+$("#waterParam").value||2.5;
   if(wm==="ratio" && (wp<1.7||wp>3.0)) caps.push(badge("warn",`Water:lye ${wp} outside common range (1.7–3.0)`));
 
-  const foCapBadge = (fragPct>foMax) ? badge("danger",`FO/EO ${fragPct}% > max ${foMax}% (${ $("#foType")?.selectedOptions?.[0]?.text || foType })`)
-                                      : (fragPct===0 ? badge("ok","FO/EO: 0 (unused)") : badge("ok",`FO/EO ${fragPct}% ≤ max ${foMax}%`));
-  caps.push(foCapBadge);
+  if(fragPct>foMax) caps.push(badge("danger",`FO/EO ${fragPct}% > max ${foMax}% (${ $("#foType").selectedOptions[0].text })`));
+  else if(fragPct===0) caps.push(badge("ok","FO/EO: 0 (unused)"));
+  else caps.push(badge("ok",`FO/EO ${fragPct}% ≤ max ${foMax}%`));
 
   if(sf<2) caps.push(badge("warn",`Superfat low (${sf}%)`));
   if(sf>12) caps.push(badge("danger",`Superfat high (${sf}%)`));
@@ -737,39 +633,35 @@ function calculate(){
     if(batch>safeMax) caps.push(badge("danger","Exceeds ~75% pot capacity (overflow risk)"));
     else if(batch>=safeMin) caps.push(badge("ok","Capacity: within safe headroom"));
   }
-  $("#safetyBadges")?.innerHTML=caps.join(" ");
+  $("#safetyBadges").innerHTML=caps.join(" ");
 
-  // additive badges mirror
-  $("#additiveBadges")?.innerHTML =
+  const spec=additivesSpec;
+  $("#additiveBadges").innerHTML =
     rangeBadge(fragPct, 0, foMax, "FO/EO")+
-    rangeBadge(+($("#slPct")?.value||0), additivesSpec.sl.min, additivesSpec.sl.max, "Sodium Lactate")+
-    rangeBadge(+($("#saltPct")?.value||0), additivesSpec.salt.min, additivesSpec.salt.max, "Salt")+
-    rangeBadge(+($("#sugarPct")?.value||0), additivesSpec.sugar.min, additivesSpec.sugar.max, "Sugar")+
-    rangeBadge(+($("#clayPct")?.value||0), additivesSpec.clay.min, additivesSpec.clay.max, "Clay")+
-    rangeBadge(+($("#chelPct")?.value||0), additivesSpec.chel.min, additivesSpec.chel.max, "Chelator");
+    rangeBadge(+$("#slPct").value||0, spec.sl.min, spec.sl.max, "Sodium Lactate")+
+    rangeBadge(+$("#saltPct").value||0, spec.salt.min, spec.salt.max, "Salt")+
+    rangeBadge(+$("#sugarPct").value||0, spec.sugar.min, spec.sugar.max, "Sugar")+
+    rangeBadge(+$("#clayPct").value||0, spec.clay.min, spec.clay.max, "Clay")+
+    rangeBadge(+$("#chelPct").value||0, spec.chel.min, spec.chel.max, "Chelator");
 
-  $("#foNote") && ($("#foNote").textContent = FO_RULES[foType]?.tip || "");
-
+  $("#foNote").textContent = FO_RULES[foType]?.tip || "";
   renderCostTable(rows, {fo});
   window._last = {na,ko,water,fo,batch,rows};
-
-  // yield
-  renderYieldRow(batch);
 }
 
 /* ========= LYE-LIMITED ========= */
 function calcLyeLimited(){
-  const naAvail = +$("#availLye")?.value||0;
-  const sf = +$("#sfLL")?.value||5;
-  const ratio = +$("#ratioLL")?.value||2.5;
-  const plan = profilePercents($("#profileLL")?.value||"PF45-30-15-10");
+  const naAvail = +$("#availLye").value||0;
+  const sf = +$("#sfLL").value||5;
+  const ratio = +$("#ratioLL").value||2.5;
+  const plan = profilePercents($("#profileLL").value);
   const SAPmix = sum(plan.map(([n,p])=> (p/100)*(SAP_NaOH[n]||0)));
   const oilsForNa = (naAvail) / ((1 - sf/100) * SAPmix);
   const fo = oilsForNa*0.03;
   const water = naAvail*ratio;
   const rows = plan.map(([n,p])=> [n, oilsForNa*(p/100)]);
   const batch = oilsForNa + naAvail + water + fo;
-  $("#llRes")?.innerHTML = `
+  $("#llRes").innerHTML = `
     <tr><th>Total oils</th><td>${oilsForNa.toFixed(1)} g</td></tr>
     ${rows.map(([n,g])=>`<tr><th>&nbsp;&nbsp;• ${n}</th><td>${g.toFixed(1)} g</td></tr>`).join('')}
     <tr><th>NaOH</th><td>${naAvail.toFixed(1)} g</td></tr>
@@ -783,64 +675,47 @@ function calcLyeLimited(){
 const KEY="BelLei_Recipes";
 function collectInputs(){
   return {
-    oils:oilsAsGrams(), target:parseByUnit($("#targetOils")?.value||0), profile:$("#profile")?.value, percentMode,
-    lyeType:$("#lyeType")?.value, lyePurity:+$("#lyePurity")?.value||100, kohPurity:+$("#kohPurity")?.value||90, dualPct:+$("#dualPct")?.value||90,
-    sf:+$("#superfat")?.value||0, waterMode:$("#waterMode")?.value, waterParam:+$("#waterParam")?.value||2.5,
-    milkPct:+$("#milkPct")?.value||0, potMl:+$("#potMl")?.value||0,
-    adds:{fo:+$("#fragPct")?.value||0, sl:+$("#slPct")?.value||0, salt:+$("#saltPct")?.value||0, sugar:+$("#sugarPct")?.value||0, clay:+$("#clayPct")?.value||0, chel:+$("#chelPct")?.value||0},
-    foType:$("#foType")?.value
+    oils:oilsAsGrams(), target:parseByUnit($("#targetOils").value||0), profile:$("#profile").value, percentMode,
+    lyeType:$("#lyeType").value, lyePurity:+$("#lyePurity").value||100, kohPurity:+$("#kohPurity").value||90, dualPct:+$("#dualPct").value||90,
+    sf:+$("#superfat").value||0, waterMode:$("#waterMode").value, waterParam:+$("#waterParam").value||2.5,
+    milkPct:+$("#milkPct").value||0, potMl:+$("#potMl").value||0,
+    adds:{fo:+$("#fragPct").value||0, sl:+$("#slPct").value||0, salt:+$("#saltPct").value||0, sugar:+$("#sugarPct").value||0, clay:+$("#clayPct").value||0, chel:+$("#chelPct").value||0},
+    foType:$("#foType").value
   };
 }
 function applyInputs(d){
-  if($("#targetOils")) $("#targetOils").value = useOz ? oz(d.target||1000).toFixed(2) : (d.target||1000);
-  if($("#profile")) $("#profile").value=d.profile||"PF45-30-15-10"; percentMode=!!d.percentMode; $("#pctBtn") && ($("#pctBtn").textContent=`Percent mode: ${percentMode?'On':'Off'}`);
-  if($("#lyeType")) $("#lyeType").value=d.lyeType||"NaOH";
-  if($("#lyePurity")) $("#lyePurity").value=d.lyePurity||100;
-  if($("#kohPurity")) $("#kohPurity").value=d.kohPurity||90;
-  if($("#dualPct")) $("#dualPct").value=d.dualPct||90;
-  if($("#superfat")) $("#superfat").value=d.sf||5;
-  if($("#waterMode")) $("#waterMode").value=d.waterMode||"ratio";
-  if($("#waterParam")) $("#waterParam").value=d.waterParam||2.5;
-  if($("#milkPct")) $("#milkPct").value=d.milkPct||0;
-  if($("#potMl")) $("#potMl").value=d.potMl||0;
-  if($("#foType")) $("#foType").value=d.foType||"FO";
-  if($("#fragPct")) $("#fragPct").value=d.adds?.fo??3;
-  if($("#slPct")) $("#slPct").value=d.adds?.sl??0;
-  if($("#saltPct")) $("#saltPct").value=d.adds?.salt??0;
-  if($("#sugarPct")) $("#sugarPct").value=d.adds?.sugar??0;
-  if($("#clayPct")) $("#clayPct").value=d.adds?.clay??0;
-  if($("#chelPct")) $("#chelPct").value=d.adds?.chel??0;
-
-  const body=$("#oilBody"); if(body){
-    body.innerHTML="";
-    const arr = d.oils||defaults.oils;
-    if(percentMode){
-      const tot = sum(arr.map(r=>r[1]||0))||1;
-      arr.forEach(([n,g])=> addOilRow(n, (g/tot*100).toFixed(2)) );
-      $("#wtHdr") && ($("#wtHdr").textContent="Percent (%)");
-    }else{
-      arr.forEach(([n,g])=> addOilRow(n, g) );
-      $("#wtHdr") && ($("#wtHdr").textContent=`Weight (${useOz?'oz':'g'})`);
-    }
+  $("#targetOils").value = useOz ? oz(d.target||1000).toFixed(2) : (d.target||1000);
+  $("#profile").value=d.profile||"PF45-30-15-10"; percentMode=!!d.percentMode; $("#pctBtn").textContent=`Percent mode: ${percentMode?'On':'Off'}`;
+  $("#lyeType").value=d.lyeType||"NaOH"; $("#lyePurity").value=d.lyePurity||100; $("#kohPurity").value=d.kohPurity||90; $("#dualPct").value=d.dualPct||90;
+  $("#superfat").value=d.sf||5; $("#waterMode").value=d.waterMode||"ratio"; $("#waterParam").value=d.waterParam||2.5;
+  $("#milkPct").value=d.milkPct||0; $("#potMl").value=d.potMl||0; $("#foType").value=d.foType||"FO";
+  $("#fragPct").value=d.adds?.fo??3; $("#slPct").value=d.adds?.sl??0; $("#saltPct").value=d.adds?.salt??0; $("#sugarPct").value=d.adds?.sugar??0; $("#clayPct").value=d.adds?.clay??0; $("#chelPct").value=d.adds?.chel??0;
+  $("#oilBody").innerHTML="";
+  if(percentMode){
+    const tot = sum((d.oils||defaults.oils).map(r=>r[1]||0))||1;
+    (d.oils||defaults.oils).forEach(([n,g])=> addOilRow(n, (g/tot*100).toFixed(2)) );
+    $("#wtHdr").textContent="Percent (%)";
+  }else{
+    (d.oils||defaults.oils).forEach(([n,g])=> addOilRow(n, g) );
+    $("#wtHdr").textContent=`Weight (${useOz?'oz':'g'})`;
   }
 }
 function saveRecipe(){
-  const name=prompt("Recipe name to save:", $("#recName")?.value||"")?.trim(); if(!name) return;
+  const name=prompt("Recipe name to save:", $("#recName").value||"").trim(); if(!name) return;
   const all=JSON.parse(localStorage.getItem(KEY)||"{}"); all[name]=collectInputs();
-  localStorage.setItem(KEY, JSON.stringify(all)); if($("#recName")) $("#recName").value=name; alert("Saved!");
+  localStorage.setItem(KEY, JSON.stringify(all)); $("#recName").value=name; alert("Saved!");
 }
 function loadRecipe(){
-  const name=prompt("Load which recipe name?", $("#recName")?.value||"")?.trim(); if(!name) return;
+  const name=prompt("Load which recipe name?", $("#recName").value||"").trim(); if(!name) return;
   const all=JSON.parse(localStorage.getItem(KEY)||"{}"); const d=all[name]; if(!d) return alert("Not found.");
   applyInputs(d); calculate();
 }
 function listRecipes(){
   const all=JSON.parse(localStorage.getItem(KEY)||"{}"); const list=Object.keys(all);
-  const el=$("#saveList"); if(!el) return;
-  el.innerHTML = list.length? list.map(n=>`<div class="tag">${n}</div>`).join('') : `<div class="note">No saved recipes yet.</div>`;
+  $("#saveList").innerHTML = list.length? list.map(n=>`<div class="tag">${n}</div>`).join('') : `<div class="note">No saved recipes yet.</div>`;
 }
 function deleteRecipe(){
-  const name=prompt("Delete which recipe name?", $("#recName")?.value||"")?.trim(); if(!name) return;
+  const name=prompt("Delete which recipe name?", $("#recName").value||"").trim(); if(!name) return;
   const all=JSON.parse(localStorage.getItem(KEY)||"{}"); delete all[name]; localStorage.setItem(KEY, JSON.stringify(all)); listRecipes(); alert("Deleted (if it existed).");
 }
 function exportJSON(){
@@ -849,272 +724,112 @@ function exportJSON(){
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="BelLeis_Recipe.json"; a.click();
 }
 
-/* ========= BEGINNER GLUE ========= */
-function setBeginnerGuardrails(){
-  const target = +(document.getElementById('b_target').value||1000);
-  if($("#targetOils")) $("#targetOils").value = target;
-
-  const style = document.getElementById('b_style').value;
-  if($("#profile")) $("#profile").value = style;
-  if (percentMode && $("#pctBtn")) { $("#pctBtn").click(); }
-  applyProfile();
-
-  let bsf = Math.min(8, Math.max(3, +(document.getElementById('b_sf').value||5)));
-  if($("#superfat")) $("#superfat").value = bsf;
-
-  const choice = document.getElementById('b_water').value;
-  const [mode,paramS] = choice.split(':');
-  if($("#waterMode")) $("#waterMode").value = mode;
-  if($("#waterParam")) $("#waterParam").value = +(paramS||2.5);
-  if($("#waterParamLbl")) $("#waterParamLbl").textContent =
-    ({ratio:"Water : Lye", pctOil:"Water % of oils", pctSoln:"Lye conc %", master:"Master-batch %"})[mode] || "Water";
-
-  const fType = document.getElementById('b_foType').value;
-  const max = (FO_RULES?.[fType]?.max ?? 4.5);
-  const tip = (FO_RULES?.[fType]?.tip || "");
-  document.getElementById('b_foTip').textContent = tip;
-
-  let fpct = +(document.getElementById('b_foPct').value||0);
-  if (fpct > max){ fpct = max; document.getElementById('b_foPct').value = max; }
-  if($("#foType")) $("#foType").value = fType;
-  if($("#fragPct")) $("#fragPct").value = fpct;
-}
-function renderBeginnerResults(){
-  $("#b_resTable").innerHTML = $("#resTable")?.innerHTML || "";
-  $("#b_badges").innerHTML = $("#safetyBadges")?.innerHTML || "";
-  $("#b_yield").innerHTML = $("#yieldRow")?.innerHTML || "";
-}
-function enterAdvanced(){ document.body.classList.add('show-advanced'); }
-function enterBeginner(){
-  document.body.classList.remove('show-advanced');
-  setBeginnerGuardrails();
-  calculate();
-  renderBeginnerResults();
-}
-
-/* ========= THEME ========= */
-function restoreTheme(){
-  const t = localStorage.getItem('bel_theme') || 'light';
-  document.documentElement.setAttribute('data-theme', t);
-}
-function toggleTheme(){
-  const cur = document.documentElement.getAttribute('data-theme') || 'light';
-  const next = cur==='light' ? 'dark' : 'light';
-  document.documentElement.setAttribute('data-theme', next);
-  localStorage.setItem('bel_theme', next);
-}
-
-/* ========= OPTIONAL PWA: safe SW register ========= */
+/* ========= OPTIONAL SW (safe) ========= */
 async function maybeRegisterSW(){
   if(!('serviceWorker' in navigator)) return;
   const swURL = new URL('./sw.js', location.href).href;
   try{
     const res = await fetch(swURL, {method:'HEAD', cache:'no-store'});
-    if(res && res.ok){ await navigator.serviceWorker.register('./sw.js').catch(()=>{}); }
-  }catch(_){} // ignore; GitHub Pages will still work fine without SW
+    if(res && res.ok){
+      await navigator.serviceWorker.register('./sw.js').catch(()=>{});
+      document.getElementById('installBtn')?.classList.remove('hide');
+      document.getElementById('installLabel').textContent = "Install App (available)";
+    }
+  }catch(_){}
 }
 
-/* ========= INIT + WIRING ========= */
+/* ========= EVENTS & INIT ========= */
 const liveUpdate = debounce(()=>{ updateOilTotals(); calculate(); }, 120);
 
+document.getElementById('oilBody').addEventListener('input',  e=>{ if(e.target.matches('input,select')) liveUpdate(); });
+document.getElementById('oilBody').addEventListener('change', e=>{ if(e.target.matches('input,select')) liveUpdate(); });
+
+document.getElementById('addOil').addEventListener('click', ()=>{ addOilRow(OILS[0], 0); });
+document.getElementById('applyBtn').addEventListener('click', applyProfile);
+document.getElementById('scaleBtn').addEventListener('click', scaleToTarget);
+document.getElementById('pctBtn').addEventListener('click', togglePctMode);
+
+document.getElementById('unitToggle').addEventListener('click', (e)=>{
+  e.preventDefault(); useOz=!useOz; unitLabel();
+  const rows = oilsAsGrams(); document.getElementById('oilBody').innerHTML="";
+  rows.forEach(([n,g])=> addOilRow(n,g)); updateOilTotals(); calculate();
+});
+
+document.getElementById('llBtn').addEventListener('click', calcLyeLimited);
+
+["lyeType","lyePurity","kohPurity","dualPct","superfat","waterMode","waterParam","milkPct","potMl","moldPreset",
+ "fragPct","foType","slPct","saltPct","sugarPct","clayPct","chelPct"].forEach(id=>{
+  const el=document.getElementById(id); if(!el) return;
+  el.addEventListener('input', liveUpdate); el.addEventListener('change', liveUpdate);
+});
+
+document.getElementById('moldPreset').addEventListener('change', ()=>{
+  document.getElementById('moldInputs').classList.toggle('hide', !document.getElementById('moldPreset').value);
+});
+document.getElementById('moldEstimate').addEventListener('click', (e)=>{
+  e.preventDefault(); const type=document.getElementById('moldPreset').value; let ml=0;
+  if(type==="loaf"||type==="slab"){ const L=+document.getElementById('mL').value||0, W=+document.getElementById('mW').value||0, H=+document.getElementById('mH').value||0; ml=L*W*H; }
+  if(type==="cavity"){ const v=+document.getElementById('cavMl').value||0, n=+document.getElementById('cavCount').value||0; ml=v*n; }
+  if(ml>0){ const est= Math.round(ml*0.7); document.getElementById('targetOils').value = useOz? oz(est).toFixed(2) : est; }
+  liveUpdate();
+});
+
+["calcBtn","printBtn","exportBtn"].forEach(id=>{
+  const el=document.getElementById(id);
+  if(id==="calcBtn") el.addEventListener('click', calculate);
+  if(id==="printBtn") el.addEventListener('click', ()=>window.print());
+  if(id==="exportBtn") el.addEventListener('click', exportJSON);
+});
+
+document.getElementById('costBtn').addEventListener('click', calcCost);
+document.getElementById('saveBtn').addEventListener('click', saveRecipe);
+document.getElementById('loadBtn').addEventListener('click', loadRecipe);
+document.getElementById('listBtn').addEventListener('click', listRecipes);
+document.getElementById('delBtn').addEventListener('click', deleteRecipe);
+document.getElementById('fbSave').addEventListener('click', ()=>{ localStorage.setItem('bel_fb',document.getElementById('fb').value||''); alert('Saved locally!'); });
+
+document.getElementById('lyeType').addEventListener('change', ()=>{
+  const val = document.getElementById('lyeType').value;
+  const productKey = document.getElementById('productType').value;
+  const cfg = PRODUCTS[productKey] || PRODUCTS.bar;
+  document.getElementById('dualBox').classList.toggle('hide', !(cfg.allowDual && val==="dual"));
+  liveUpdate();
+});
+document.getElementById('waterMode').addEventListener('change', ()=>{
+  const map={ratio:"Water : Lye", pctOil:"Water % of oils", pctSoln:"Lye conc %", master:"Master-batch %"};
+  document.getElementById('waterParamLbl').textContent = map[document.getElementById('waterMode').value]||"Water";
+});
+
+let _deferredPrompt=null;
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault(); _deferredPrompt=e;
+  document.getElementById('installBtn').classList.remove('hide');
+  document.getElementById('installLabel').textContent="Install App (available)";
+});
+document.getElementById('installBtn').addEventListener('click', ()=>{
+  if(_deferredPrompt){ _deferredPrompt.prompt(); }
+});
+
+/* INIT */
 document.addEventListener('DOMContentLoaded', async ()=>{
-  restoreTheme();
   unitLabel();
+  document.getElementById('oilBody').innerHTML=""; defaults.oils.forEach(o=> addOilRow(...o));
+  document.getElementById('potMl').value=defaults.potMl;
 
-  // Beginner default
-  enterBeginner();
+  // Default product is Bar Soap
+  setProductType('bar');
 
-  // Advanced defaults
-  if($("#oilBody")){ $("#oilBody").innerHTML=""; defaults.oils.forEach(o=> addOilRow(...o)); }
-  if($("#potMl")) $("#potMl").value=defaults.potMl;
+  // Initial calc
   calculate();
 
-  // Theme + mode
-  $("#themeBtn")?.addEventListener('click', toggleTheme);
-  $("#toggleModeBtn")?.addEventListener('click', (e)=>{
-    const adv = document.body.classList.toggle('show-advanced');
-    e.target.textContent = adv ? 'Switch to Beginner' : 'Switch to Advanced';
-    e.target.setAttribute('aria-pressed', adv ? 'false' : 'true');
-    if(!adv){ enterBeginner(); } else { /* show advanced */ }
-  });
-  $("#b_showAdvancedBtn")?.addEventListener('click', enterAdvanced);
-  $("#b_calcBtn")?.addEventListener('click', ()=>{ setBeginnerGuardrails(); calculate(); renderBeginnerResults(); });
-
-  // Beginner live reflect
-  ['b_target','b_style','b_sf','b_water','b_foType','b_foPct'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el) el.addEventListener('change', ()=>{
-      if(!document.body.classList.contains('show-advanced')){
-        setBeginnerGuardrails(); calculate(); renderBeginnerResults();
-      }
-    });
-  });
-
-  // Advanced wiring
-  $("#addOil")?.addEventListener('click', ()=>{ addOilRow(OILS[0], 0); });
-  $("#applyBtn")?.addEventListener('click', applyProfile);
-  $("#scaleBtn")?.addEventListener('click', scaleToTarget);
-  $("#pctBtn")?.addEventListener('click', togglePctMode);
-
-  $("#unitToggle")?.addEventListener('click', (e)=>{ e.preventDefault(); useOz=!useOz; unitLabel();
-    const rows = oilsAsGrams(); const body=$("#oilBody"); if(body){ body.innerHTML=""; rows.forEach(([n,g])=> addOilRow(n,g)); }
-    updateOilTotals(); calculate();
-  });
-
-  ["lyeType","lyePurity","kohPurity","dualPct","superfat","waterMode","waterParam","milkPct","potMl","moldPreset",
-   "fragPct","foType","slPct","saltPct","sugarPct","clayPct","chelPct"].forEach(id=>{
-    const el=document.getElementById(id); if(!el) return;
-    el.addEventListener('input', liveUpdate); el.addEventListener('change', liveUpdate);
-  });
-
-  $("#moldPreset")?.addEventListener('change', ()=>{ $("#moldInputs")?.classList.toggle('hide', !$("#moldPreset").value); });
-  $("#moldEstimate")?.addEventListener('click', (e)=>{ e.preventDefault(); const type=$("#moldPreset").value; let ml=0;
-    if(type==="loaf"||type==="slab"){ const L=+$("#mL").value||0, W=+$("#mW").value||0, H=+$("#mH").value||0; ml=L*W*H; }
-    if(type==="cavity"){ const v=+$("#cavMl").value||0, n=+$("#cavCount").value||0; ml=v*n; }
-    if(ml>0){ const est= Math.round(ml*0.7); if($("#targetOils")) $("#targetOils").value = useOz? oz(est).toFixed(2) : est; }
-    liveUpdate();
-  });
-
-  ["calcBtn","printBtn","exportBtn"].forEach(id=>{
-    const el=document.getElementById(id);
-    if(id==="calcBtn") el?.addEventListener('click', calculate);
-    if(id==="printBtn") el?.addEventListener('click', ()=>window.print());
-    if(id==="exportBtn") el?.addEventListener('click', exportJSON);
-  });
-
-  // COST & SAVE/LOAD
-  $("#costBtn")?.addEventListener('click', calcCost);
-  $("#saveBtn")?.addEventListener('click', saveRecipe);
-  $("#loadBtn")?.addEventListener('click', loadRecipe);
-  $("#listBtn")?.addEventListener('click', listRecipes);
-  $("#delBtn")?.addEventListener('click', deleteRecipe);
-  $("#fbSave")?.addEventListener('click', ()=>{ localStorage.setItem('bel_fb',$('#fb')?.value||''); alert('Saved locally!'); });
-
-  // Tabs (advanced)
-  document.querySelectorAll('.only-advanced .tab').forEach(t=>{
-    t.addEventListener('click', ()=>{
-      document.querySelectorAll('.only-advanced .tab').forEach(x=>x.classList.remove('active'));
-      t.classList.add('active');
-      const id=t.dataset.tab;
-      ["calc","lyelimited","cost","save","feedback","install"].forEach(sec=>{
-        const el=$("#"+sec); if(!el) return;
-        el.classList.toggle('hide', sec!==id && !(id==="install" && sec==="calc"));
-      });
-      if(id==="cost" && window._last?.rows) renderCostTable(window._last.rows,{fo:window._last.fo});
-    });
-  });
-
-  // Show install if present
-  window.addEventListener('beforeinstallprompt', (e)=>{
-    e.preventDefault(); window._deferredPrompt=e;
-    $("#installBtn")?.classList.remove('hide');
-    $("#installLabel") && ($("#installLabel").textContent="Install App (available)");
-  });
-  $("#installBtn")?.addEventListener('click', ()=>{ if(window._deferredPrompt){ window._deferredPrompt.prompt(); } });
-
-  // Service worker (safe)
+  // Optional SW (safe)
   await maybeRegisterSW();
-});
-</script>
 
-<script>
-/* === ADVANCED EXTRAS === */
-  /* ========= TRACE HINT (for experienced makers) =========
-   Very rough qualitative hint based on lye conc, coconut/castor %, salt/sugar adders.
-   This is NOT a timer—just a planning cue.
-*/
-function traceHint(){
-  const rows = oilsAsGrams();
-  const total = Math.max(1, sum(rows.map(r=>r[1]||0)));
-  const pct = name => (rows.find(r=>r[0]===name)?.[1]||0) / total * 100;
-  const coco = pct("Coconut Oil 76°");
-  const castor = pct("Castor Oil");
-  const sugar = +($("#sugarPct")?.value||0);
-  const salt  = +($("#saltPct")?.value||0);
-
-  const lyeType=$("#lyeType")?.value||'NaOH';
-  const sf = +$("#superfat")?.value||0;
-  const {na,ko} = calcLyeFromOils(rows,sf,lyeType);
-  const totalNaEq = na + (ko/KOH_FACTOR);
-  const water = waterFromMode($("#waterMode")?.value||'ratio', +($("#waterParam")?.value||2.5), totalNaEq, total);
-  const conc = concFrom(totalNaEq, water);
-
-  let score = 0;
-  score += (conc-33);                 // >33 faster, <33 slower
-  score += (coco>25? 3 : coco>20? 2 : coco>10? 1 : 0);
-  score += (castor>8? 2 : castor>5? 1 : 0);
-  score += (sugar>1? 1 : 0);
-  score += (salt>1? 1 : 0);
-
-  let txt = "Moderate trace speed";
-  if(score>=6) txt="Fast trace (plan quick pour)";
-  else if(score<=-2) txt="Slow trace (more working time)";
-
-  return badge(score>=6?"warn":score<=-2?"ok":"ok", txt);
-}
-
-(function hookTraceHint(){
-  const el = document.createElement('div');
-  el.className='kpi';
-  el.id='traceHintRow';
-  $("#results")?.appendChild(el);
-  const upd = ()=>{ $("#traceHintRow").innerHTML = traceHint(); $("#b_badges") && ($("#b_badges").innerHTML += " " + traceHint()); };
-  document.addEventListener('input', debounce(upd, 120), true);
-  document.addEventListener('change', debounce(upd, 120), true);
-  setTimeout(upd, 200);
-})();
-
-/* ========= SELF-TESTS (quick regression) ========= */
-function almostEqual(a,b,t=1e-2){ return Math.abs(a-b) <= t; }
-function runSelfTests(){
-  const out=[]; let pass=0, total=0;
-  function test(name, fn){
-    total++;
-    try{
-      const ok = !!fn();
-      if(ok){ pass++; out.push(`✅ ${name}`); } else { out.push(`❌ ${name}`); }
-    }catch(e){ out.push(`💥 ${name}: ${e.message||e}`); }
-  }
-
-  // Test 1: profile sum & scale
-  test("Profile scaling to target", ()=>{
-    document.getElementById('targetOils') && (document.getElementById('targetOils').value=1000);
-    document.getElementById('profile') && (document.getElementById('profile').value='PF45-30-15-10');
-    applyProfile();
-    const rows = oilsAsGrams();
-    const sumG = sum(rows.map(r=>r[1]));
-    return almostEqual(sumG, 1000, 0.5);
-  });
-
-  // Test 2: NaOH calc known case (OO 1000 g, SF 5%)
-  test("NaOH for 100% Olive, 1000g, SF5", ()=>{
-    const body=$("#oilBody"); if(!body) return false;
-    body.innerHTML="";
-    addOilRow("Olive Oil (pure)", 1000);
-    $("#superfat") && ($("#superfat").value=5);
-    $("#lyeType") && ($("#lyeType").value='NaOH');
-    calculate();
-    const text=$("#resTable")?.textContent || "";
-    // SAP OO 0.134 -> base Na=134g; SF5 => 127.3g
-    return /NaOH.*127(\.|,)?3/.test(text);
-  });
-
-  // Test 3: Concentration readout sanity
-  test("Lye conc in sweet spot near 33%", ()=>{
-    $("#waterMode") && ($("#waterMode").value='pctSoln');
-    $("#waterParam") && ($("#waterParam").value=33);
-    calculate();
-    const txt=$("#safetyBadges")?.textContent||"";
-    return txt.includes("sweet spot") || txt.includes("33");
-  });
-
-  return {pass,total,details:out};
-}
-window.addEventListener('load', ()=>{
-  const r = runSelfTests();
-  console.log(`[Self-tests] ${r.pass}/${r.total}`);
-  r.details.forEach(x=>console.log(x));
+  // Product select wiring (after defaults in place)
+  document.getElementById('productType').addEventListener('change', e=> setProductType(e.target.value));
 });
 </script>
 </body>
 </html>
+
+  
