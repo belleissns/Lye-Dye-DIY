@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Lye, Dye, and DIY — Bel Lei’s Soap Calculator (v0.6 RESTORE)</title>
+<title>Lye, Dye, and DIY — Bel Lei’s Soap Calculator (v0.6 RESTORE+fixes)</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -24,7 +24,7 @@ h1{margin:0 0 4px;font-size:26px;letter-spacing:.3px}
 .card{background:var(--panel);border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.06);padding:14px}
 .grid{display:grid;gap:12px}
 .controls{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 12px}
-.btn{background:var(--brand);color:#fff;border:none;border-radius:10px;padding:10px 14px;font-weight:700}
+.btn{background:var(--brand);color:#fff;border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
 .btn.subtle{background:#fff;border:1px solid #e5e7eb;color:var(--ink)}
 .btn.alt{background:var(--olive);color:#fff}
 .btn:focus{outline:none;box-shadow:var(--ring)}
@@ -144,7 +144,8 @@ legend{font-weight:800;margin-bottom:6px}
         </div>
       </div>
 
-      <div class="row3" id="dualBox" class="hide">
+      <!-- FIXED: had duplicate class attributes; now "row3 hide" -->
+      <div class="row3 hide" id="dualBox">
         <div>
           <label for="dualPct">Dual-lye: % as NaOH (rest KOH)</label>
           <input id="dualPct" type="number" value="90">
@@ -331,6 +332,7 @@ const additivesSpec = {
   frag:{min:0,max:4.5}, sl:{min:1,max:3}, salt:{min:0,max:3},
   sugar:{min:0,max:3}, clay:{min:0,max:2}, chel:{min:0,max:0.5}
 };
+/* KEEP ONE copy of FO_RULES only (removed duplicate later) */
 const FO_RULES = {
   "FO":            {max:4.5, tip:"Most FOs 2–4.5%. Check supplier notes for acceleration."},
   "EO-Peppermint": {max:3.0, tip:"Cool; can feel icy. 1.5–3% typical."},
@@ -347,7 +349,6 @@ const $$=s=>document.querySelectorAll(s);
 function oz(n){return n/28.349523125}
 function g(n){return n*28.349523125}
 function unitLabel(){ $("#uLabel").textContent = useOz?'oz':'g'; $("#wtHdr").textContent = `Weight (${useOz?'oz':'g'})`; }
-function valToDisplay(n){ return useOz ? oz(n) : n; }
 function parseByUnit(v){ const n=parseFloat(v)||0; return useOz ? g(n) : n; }
 function badge(level,text){const c=level==="ok"?"b-ok":level==="warn"?"b-warn":"b-danger";return `<span class="badge ${c}">${text}</span>`;}
 function sum(arr){return arr.reduce((s,x)=>s+x,0)}
@@ -433,7 +434,6 @@ function scaleToTarget(){
   $("#oilBody").innerHTML=""; rows.forEach(([n,g])=> addOilRow(n,g));
   updateOilTotals(); calculate();
 }
-
 /* ========= LYE / WATER / ADDITIVES ========= */
 function calcLyeFromOils(rows, sf, type){
   const baseNa = sum(rows.map(([n,g])=> g*(SAP_NaOH[n]||0)));
@@ -500,13 +500,6 @@ function calcCost(){
 }
 
 /* ========= RESULTS ========= */
-const FO_RULES = {
-  "FO":            {max:4.5, tip:"Most FOs 2–4.5%. Check supplier notes."},
-  "EO-Peppermint": {max:3.0, tip:"Cool; 1.5–3% typical."},
-  "EO-Lavender":   {max:4.0, tip:"Gentle; 2–4% typical."},
-  "EO-CinnamonBark":{max:0.5, tip:"Dermal max very low. Patch test."},
-  "EO-CloveBud":   {max:0.5, tip:"Hot EO; use sparingly. Patch test."}
-};
 function fragranceCap(type){ return FO_RULES[type]?.max ?? 4.5; }
 function concFrom(lye, water){ const conc = lye/(lye+water)*100; return isFinite(conc)?conc:0; }
 
@@ -566,6 +559,7 @@ function calculate(){
                                       : (fragPct===0 ? badge("ok","FO/EO: 0 (unused)") : badge("ok",`FO/EO ${fragPct}% ≤ max ${foMax}%`));
   caps.push(foCapBadge);
 
+  const sf = +$("#superfat").value||0;
   if(sf<2) caps.push(badge("warn",`Superfat low (${sf}%)`));
   if(sf>12) caps.push(badge("danger",`Superfat high (${sf}%)`));
 
@@ -664,10 +658,24 @@ function exportJSON(){
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="BelLeis_Recipe.json"; a.click();
 }
 
-/* ========= INSTALL ========= */
-let _deferredPrompt=null;
-window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); _deferredPrompt=e; $("#installBtn").classList.remove('hide'); $("#installLabel").textContent="Install App (available)"; });
-function installApp(){ if(_deferredPrompt){ _deferredPrompt.prompt(); }}
+/* ========= OPTIONAL PWA: conditional SW registration ========= */
+async function maybeRegisterSW(){
+  if(!('serviceWorker' in navigator)) return;
+  const swURL = new URL('./sw.js', location.href).href;
+  try{
+    const res = await fetch(swURL, {method:'HEAD', cache:'no-store'});
+    if(res && res.ok){
+      await navigator.serviceWorker.register('./sw.js').catch(()=>{});
+      // show install CTA when available
+      document.getElementById('installBtn')?.classList.remove('hide');
+      document.getElementById('installLabel').textContent = "Install App (available)";
+    }else{
+      console.info('SW not found at', swURL, '— skipping registration.');
+    }
+  }catch(err){
+    console.info('Skipping SW registration:', err?.message||err);
+  }
+}
 
 /* ========= TABS ========= */
 document.querySelectorAll('.tab').forEach(t=>{
@@ -676,7 +684,7 @@ document.querySelectorAll('.tab').forEach(t=>{
     t.classList.add('active');
     const id=t.dataset.tab;
     ["calc","lyelimited","cost","save","feedback","install"].forEach(sec=>{
-      const el=$("#"+sec); if(!el) return;
+      const el=document.getElementById(sec); if(!el) return;
       el.classList.toggle('hide', sec!==id && !(id==="install" && sec==="calc"));
     });
     if(id==="cost" && window._last?.rows) renderCostTable(window._last.rows,{fo:window._last.fo});
@@ -688,25 +696,33 @@ const liveUpdate = debounce(()=>{ updateOilTotals(); calculate(); }, 120);
 document.getElementById('oilBody').addEventListener('input',  e=>{ if(e.target.matches('input,select')) liveUpdate(); });
 document.getElementById('oilBody').addEventListener('change', e=>{ if(e.target.matches('input,select')) liveUpdate(); });
 
-$("#addOil").addEventListener('click', ()=>{ addOilRow(OILS[0], 0); });
-$("#applyBtn").addEventListener('click', applyProfile);
-$("#scaleBtn").addEventListener('click', scaleToTarget);
-$("#pctBtn").addEventListener('click', togglePctMode);
+document.getElementById('addOil').addEventListener('click', ()=>{ addOilRow(OILS[0], 0); });
+document.getElementById('applyBtn').addEventListener('click', applyProfile);
+document.getElementById('scaleBtn').addEventListener('click', scaleToTarget);
+document.getElementById('pctBtn').addEventListener('click', togglePctMode);
 
-$("#unitToggle").addEventListener('click', (e)=>{ e.preventDefault(); useOz=!useOz; unitLabel();
-  const rows = oilsAsGrams(); $("#oilBody").innerHTML=""; rows.forEach(([n,g])=> addOilRow(n,g)); updateOilTotals(); calculate();
+document.getElementById('unitToggle').addEventListener('click', (e)=>{
+  e.preventDefault(); useOz=!useOz; unitLabel();
+  const rows = oilsAsGrams(); document.getElementById('oilBody').innerHTML="";
+  rows.forEach(([n,g])=> addOilRow(n,g)); updateOilTotals(); calculate();
 });
+
+/* NEW: Wire Lye-Limited button */
+document.getElementById('llBtn').addEventListener('click', calcLyeLimited);
 
 ["lyeType","lyePurity","kohPurity","dualPct","superfat","waterMode","waterParam","milkPct","potMl","moldPreset",
  "fragPct","foType","slPct","saltPct","sugarPct","clayPct","chelPct"].forEach(id=>{
   const el=document.getElementById(id); if(!el) return;
   el.addEventListener('input', liveUpdate); el.addEventListener('change', liveUpdate);
 });
-document.getElementById('moldPreset').addEventListener('change', ()=>{ $("#moldInputs").classList.toggle('hide', !$("#moldPreset").value); });
-document.getElementById('moldEstimate').addEventListener('click', (e)=>{ e.preventDefault(); const type=$("#moldPreset").value; let ml=0;
-  if(type==="loaf"||type==="slab"){ const L=+$("#mL").value||0, W=+$("#mW").value||0, H=+$("#mH").value||0; ml=L*W*H; }
-  if(type==="cavity"){ const v=+$("#cavMl").value||0, n=+$("#cavCount").value||0; ml=v*n; }
-  if(ml>0){ const est= Math.round(ml*0.7); $("#targetOils").value = useOz? oz(est).toFixed(2) : est; }
+document.getElementById('moldPreset').addEventListener('change', ()=>{
+  document.getElementById('moldInputs').classList.toggle('hide', !document.getElementById('moldPreset').value);
+});
+document.getElementById('moldEstimate').addEventListener('click', (e)=>{
+  e.preventDefault(); const type=document.getElementById('moldPreset').value; let ml=0;
+  if(type==="loaf"||type==="slab"){ const L=+document.getElementById('mL').value||0, W=+document.getElementById('mW').value||0, H=+document.getElementById('mH').value||0; ml=L*W*H; }
+  if(type==="cavity"){ const v=+document.getElementById('cavMl').value||0, n=+document.getElementById('cavCount').value||0; ml=v*n; }
+  if(ml>0){ const est= Math.round(ml*0.7); document.getElementById('targetOils').value = useOz? oz(est).toFixed(2) : est; }
   liveUpdate();
 });
 
@@ -723,28 +739,37 @@ document.getElementById('saveBtn').addEventListener('click', saveRecipe);
 document.getElementById('loadBtn').addEventListener('click', loadRecipe);
 document.getElementById('listBtn').addEventListener('click', listRecipes);
 document.getElementById('delBtn').addEventListener('click', deleteRecipe);
-document.getElementById('fbSave').addEventListener('click', ()=>{ localStorage.setItem('bel_fb',$('#fb').value||''); alert('Saved locally!'); });
+document.getElementById('fbSave').addEventListener('click', ()=>{ localStorage.setItem('bel_fb',document.getElementById('fb').value||''); alert('Saved locally!'); });
 
 /* DUAL BOX VISIBILITY + WATER LABEL */
 document.getElementById('lyeType').addEventListener('change', ()=>{
-  $("#dualBox").classList.toggle('hide', $("#lyeType").value!=="dual");
+  document.getElementById('dualBox').classList.toggle('hide', document.getElementById('lyeType').value!=="dual");
   liveUpdate();
 });
 document.getElementById('waterMode').addEventListener('change', ()=>{
   const map={ratio:"Water : Lye", pctOil:"Water % of oils", pctSoln:"Lye conc %", master:"Master-batch %"};
-  $("#waterParamLbl").textContent = map[$("#waterMode").value]||"Water";
+  document.getElementById('waterParamLbl').textContent = map[document.getElementById('waterMode').value]||"Water";
 });
 
-/* INSTALL BUTTON */
-document.getElementById('installBtn').addEventListener('click', ()=>{ if(window._deferredPrompt){ window._deferredPrompt.prompt(); }});
+/* INSTALL BUTTON (FIXED: use the same _deferredPrompt var) */
+let _deferredPrompt=null;
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault(); _deferredPrompt=e;
+  document.getElementById('installBtn').classList.remove('hide');
+  document.getElementById('installLabel').textContent="Install App (available)";
+});
+document.getElementById('installBtn').addEventListener('click', ()=>{
+  if(_deferredPrompt){ _deferredPrompt.prompt(); }
+});
 
 /* INIT */
-document.addEventListener('DOMContentLoaded', ()=>{
+document.addEventListener('DOMContentLoaded', async ()=>{
   unitLabel();
-  $("#oilBody").innerHTML=""; defaults.oils.forEach(o=> addOilRow(...o));
-  $("#potMl").value=defaults.potMl;
+  document.getElementById('oilBody').innerHTML=""; defaults.oils.forEach(o=> addOilRow(...o));
+  document.getElementById('potMl').value=defaults.potMl;
   calculate();
-  if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
+  // Conditional SW registration to avoid 404 error
+  await maybeRegisterSW();
 });
 </script>
 </body>
