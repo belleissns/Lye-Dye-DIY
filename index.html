@@ -101,7 +101,38 @@ label{font-weight:800;font-size:14px;margin-bottom:6px;display:block}
         <option value="balm">Lip Balm / Body Butter (no lye)</option>
         <option value="lotion">Body Lotion (emulsified)</option>
       </select>
-      <span id="modeTag">Bar Soap</span>
+      <!-- === MODE SELECTOR === -->
+<div class="mode-selector">
+  <label for="modeSelect"><strong>Calculator Mode:</strong></label>
+  <select id="modeSelect">
+    <optgroup label="🧼 Soaps">
+      <option value="bar">Bar Soap (NaOH)</option>
+      <option value="liquid">Liquid Soap (KOH)</option>
+      <option value="shampooBar">Shampoo Bar</option>
+      <option value="shampooLiquid">Liquid Shampoo</option>
+    </optgroup>
+    <optgroup label="💄 Balms & Butters">
+      <option value="lipBalm">Lip Balm</option>
+      <option value="bodyButter">Body Butter</option>
+      <option value="lotionBar">Lotion Bar</option>
+    </optgroup>
+    <optgroup label="🧴 Lotions & Scrubs">
+      <option value="lotion">Body Lotion / Cream</option>
+      <option value="sugarScrub">Sugar Scrub</option>
+      <option value="saltScrub">Salt Scrub</option>
+    </optgroup>
+    <optgroup label="🧽 Household">
+      <option value="dishSoap">Dish Soap</option>
+      <option value="laundrySoap">Laundry Soap</option>
+      <option value="cleaningPaste">Cleaning Paste</option>
+    </optgroup>
+    <optgroup label="🌿 Extras">
+      <option value="shavingSoap">Shaving Soap</option>
+      <option value="deodorantBar">Deodorant Bar</option>
+      <option value="massageBar">Massage Bar</option>
+    </optgroup>
+  </select>
+</div>
     </div>
     <div class="note" id="productHelp">Balanced defaults for beginner success. Switch products anytime.</div>
   </div>
