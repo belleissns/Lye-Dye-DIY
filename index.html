@@ -144,7 +144,7 @@ legend{font-weight:800;margin-bottom:6px}
         </div>
       </div>
 
-      <!-- FIXED: had duplicate class attributes; now "row3 hide" -->
+      <!-- fixed: correct classes -->
       <div class="row3 hide" id="dualBox">
         <div>
           <label for="dualPct">Dual-lye: % as NaOH (rest KOH)</label>
@@ -332,7 +332,6 @@ const additivesSpec = {
   frag:{min:0,max:4.5}, sl:{min:1,max:3}, salt:{min:0,max:3},
   sugar:{min:0,max:3}, clay:{min:0,max:2}, chel:{min:0,max:0.5}
 };
-/* KEEP ONE copy of FO_RULES only (removed duplicate later) */
 const FO_RULES = {
   "FO":            {max:4.5, tip:"Most FOs 2–4.5%. Check supplier notes for acceleration."},
   "EO-Peppermint": {max:3.0, tip:"Cool; can feel icy. 1.5–3% typical."},
@@ -345,19 +344,23 @@ let useOz = false;
 
 /* ========= HELPERS ========= */
 const $=s=>document.querySelector(s);
-const $$=s=>document.querySelectorAll(s);
 function oz(n){return n/28.349523125}
 function g(n){return n*28.349523125}
-function unitLabel(){ $("#uLabel").textContent = useOz?'oz':'g'; $("#wtHdr").textContent = `Weight (${useOz?'oz':'g'})`; }
+function unitLabel(){ document.getElementById("uLabel").textContent = useOz?'oz':'g'; document.getElementById("wtHdr").textContent = `Weight (${useOz?'oz':'g'})`; }
 function parseByUnit(v){ const n=parseFloat(v)||0; return useOz ? g(n) : n; }
 function badge(level,text){const c=level==="ok"?"b-ok":level==="warn"?"b-warn":"b-danger";return `<span class="badge ${c}">${text}</span>`;}
 function sum(arr){return arr.reduce((s,x)=>s+x,0)}
 function cssId(n){return n.replace(/[^a-z0-9]/gi,'_')}
 function debounce(fn, ms=160){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }}
 
+
+
+
+
+  /* ========= SECTION TWO ========= */
 /* ========= OILS TABLE ========= */
 function oilRows(){
-  return [...$("#oilBody").children].map(tr=>{
+  return [...document.getElementById("oilBody").children].map(tr=>{
     const name = tr.querySelector("select").value;
     const v = parseFloat(tr.querySelector("input").value||0);
     return [name, v];
@@ -368,7 +371,7 @@ function oilsAsGrams(){
   if(!percentMode){
     return rows.map(([n,v])=> [n, parseByUnit(v)]);
   }
-  const target = parseByUnit($("#targetOils").value||0);
+  const target = parseByUnit(document.getElementById("targetOils").value||0);
   return rows.map(([n,p])=> [n, target * ((+p||0)/100) ]);
 }
 function addOilRow(name="", val=0){
@@ -378,12 +381,12 @@ function addOilRow(name="", val=0){
     <td><input type="number" inputmode="decimal" value="${val? (percentMode? val : (useOz? oz(val).toFixed(2) : val)) : ''}"></td>
     <td><button class="btn subtle" type="button">Remove</button></td>`;
   tr.querySelector("button").addEventListener('click', ()=>{ tr.remove(); liveUpdate(); });
-  $("#oilBody").appendChild(tr);
+  document.getElementById("oilBody").appendChild(tr);
 }
 function updateOilTotals(){
   const rows = oilsAsGrams();
   const totG = sum(rows.map(r=>r[1]||0));
-  $("#oilTotals").innerHTML = `<div>Total oils: <b>${totG.toFixed(1)} g</b> (${oz(totG).toFixed(2)} oz)</div>`;
+  document.getElementById("oilTotals").innerHTML = `<div>Total oils: <b>${totG.toFixed(1)} g</b> (${oz(totG).toFixed(2)} oz)</div>`;
 }
 
 /* ========= PROFILES / SCALING ========= */
@@ -393,9 +396,9 @@ function profilePercents(key){
   return [["Olive Oil (pure)",45],["Coconut Oil 76°",30],["Lard",15],["Shea Butter (raw)",10]];
 }
 function applyProfile(){
-  const tgtG = parseByUnit($("#targetOils").value||0);
-  const plan = profilePercents($("#profile").value);
-  $("#oilBody").innerHTML="";
+  const tgtG = parseByUnit(document.getElementById("targetOils").value||0);
+  const plan = profilePercents(document.getElementById("profile").value);
+  document.getElementById("oilBody").innerHTML="";
   if(percentMode){
     plan.forEach(([n,p])=> addOilRow(n, p));
   }else{
@@ -409,12 +412,12 @@ function applyProfile(){
 }
 function togglePctMode(){
   percentMode = !percentMode;
-  $("#pctBtn").textContent = `Percent mode: ${percentMode?'On':'Off'}`;
-  $("#wtHdr").textContent = percentMode? "Percent (%)" : `Weight (${useOz?'oz':'g'})`;
+  document.getElementById("pctBtn").textContent = `Percent mode: ${percentMode?'On':'Off'}`;
+  document.getElementById("wtHdr").textContent = percentMode? "Percent (%)" : `Weight (${useOz?'oz':'g'})`;
   const rows = oilsAsGrams();
-  $("#oilBody").innerHTML="";
+  document.getElementById("oilBody").innerHTML="";
   if(percentMode){
-    const tgt = sum(rows.map(r=>r[1]||0)) || parseByUnit($("#targetOils").value||0);
+    const tgt = sum(rows.map(r=>r[1]||0)) || parseByUnit(document.getElementById("targetOils").value||0);
     rows.forEach(([n,g])=> addOilRow(n, tgt? (g/tgt*100).toFixed(2) : 0));
   }else{
     rows.forEach(([n,g])=> addOilRow(n, g));
@@ -422,26 +425,34 @@ function togglePctMode(){
   updateOilTotals(); calculate();
 }
 function scaleToTarget(){
-  const tgt = parseByUnit($("#targetOils").value||0);
+  const tgt = parseByUnit(document.getElementById("targetOils").value||0);
   let rows = oilsAsGrams();
   if(percentMode){
-    const totalPct = sum(oilRows().map(r=>+r[1]||0))||100;
-    rows = oilRows().map(([n,p],i)=> [n, i===oilRows().length-1? (tgt - sum(oilRows().slice(0,-1).map(([n2,p2])=> Math.round(tgt*(p2/totalPct))))) : Math.round(tgt*(p/totalPct)) ]);
+    const allRows = oilRows();
+    const totalPct = sum(allRows.map(r=>+r[1]||0))||100;
+    rows = allRows.map(([n,p],i)=> [n, i===allRows.length-1
+      ? (tgt - sum(allRows.slice(0,-1).map(([_,p2])=> Math.round(tgt*(p2/totalPct)))))
+      : Math.round(tgt*(p/totalPct)) ]);
   }else{
     const cur = sum(rows.map(r=>r[1]||0))||1;
     rows = rows.map(([n,g])=> [n, g*tgt/cur]);
   }
-  $("#oilBody").innerHTML=""; rows.forEach(([n,g])=> addOilRow(n,g));
+  document.getElementById("oilBody").innerHTML=""; rows.forEach(([n,g])=> addOilRow(n,g));
   updateOilTotals(); calculate();
 }
+
 /* ========= LYE / WATER / ADDITIVES ========= */
 function calcLyeFromOils(rows, sf, type){
   const baseNa = sum(rows.map(([n,g])=> g*(SAP_NaOH[n]||0)));
   const neededNa = baseNa*(1 - sf/100);
-  const naPur = +($("#lyePurity").value||100), koPur=+($("#kohPurity").value||90);
+  const naPur = +(document.getElementById("lyePurity").value||100);
+  const koPur = +(document.getElementById("kohPurity").value||90);
   if(type==='NaOH') return {na: neededNa*(100/Math.max(1,naPur)), ko:0};
-  if(type==='KOH'){ const ko = neededNa*KOH_FACTOR*(100/Math.max(1,koPur)); return {na:0, ko}; }
-  const pctNa = (+$("#dualPct").value||90)/100;
+  if(type==='KOH'){
+    const ko = neededNa*KOH_FACTOR*(100/Math.max(1,koPur));
+    return {na:0, ko};
+  }
+  const pctNa = (+document.getElementById("dualPct").value||90)/100;
   const na = neededNa*pctNa*(100/Math.max(1,naPur));
   const ko = (neededNa*(1-pctNa)*KOH_FACTOR)*(100/Math.max(1,koPur));
   return {na,ko};
@@ -465,7 +476,7 @@ function rangeBadge(val,min,max,label){
 /* ========= COSTING ========= */
 const priceDB={};
 function renderCostTable(rows, extras){
-  const host=$("#costWrap"); host.innerHTML="";
+  const host=document.getElementById("costWrap"); host.innerHTML="";
   rows.forEach(([name,g])=>{
     const row=document.createElement("div"); row.className="row3";
     row.innerHTML=`
@@ -485,14 +496,16 @@ function calcCost(){
   const rows = window._last?.rows||[];
   let c=0;
   rows.forEach(([n,g])=>{
-    const p={cost:+$(`#cost_${cssId(n)}`)?.value||0, size:+$(`#size_${cssId(n)}`)?.value||0};
+    const p={cost:+(document.getElementById(`cost_${cssId(n)}`)?.value||0),
+             size:+(document.getElementById(`size_${cssId(n)}`)?.value||0)};
     priceDB[n]=p; if(p.size>0) c += (p.cost/p.size)*g;
   });
-  const foCost={cost:+$("#cost_FO").value||0, size:+$("#size_FO").value||0}; priceDB.FO=foCost;
+  const foCost={cost:+(document.getElementById("cost_FO").value||0), size:+(document.getElementById("size_FO").value||0)};
+  priceDB.FO=foCost;
   if(foCost.size>0) c += (foCost.cost/foCost.size)* (window._last?.fo||0);
-  const bars=+$("#barsCount").value||10, price=+$("#priceBar").value||0;
+  const bars=+(document.getElementById("barsCount").value||10), price=+(document.getElementById("priceBar").value||0);
   const perBar = c/(bars||1), margin = price? ((price - perBar)/price)*100 : 0;
-  $("#costSummary").innerHTML = `
+  document.getElementById("costSummary").innerHTML = `
     <div>COGS (batch): <b>$${c.toFixed(2)}</b></div>
     <div>COGS per bar: <b>$${perBar.toFixed(2)}</b></div>
     <div>Price/bar: <b>$${price.toFixed(2)}</b></div>
@@ -503,55 +516,38 @@ function calcCost(){
 function fragranceCap(type){ return FO_RULES[type]?.max ?? 4.5; }
 function concFrom(lye, water){ const conc = lye/(lye+water)*100; return isFinite(conc)?conc:0; }
 
-<script>
-// --- replace your existing calculate() with this ---
 function calculate(){
   const rows = oilsAsGrams();
   const gOils = sum(rows.map(([_,g])=>g||0));
-
-  // Get key inputs once
   const sf = +document.getElementById("superfat").value || 0;
-  const type = document.getElementById("lyeType").value;
+  const type=document.getElementById("lyeType").value;
 
-  // Lye calc
-  const {na,ko} = calcLyeFromOils(rows, sf, type);
-  const totalNaEq = na + (ko / KOH_FACTOR);
-
-  // Water selection
+  const {na,ko} = calcLyeFromOils(rows,sf,type);
+  const totalNaEq = na + (ko/KOH_FACTOR);
   const water = waterFromMode(
     document.getElementById("waterMode").value,
-    +document.getElementById("waterParam").value || 2.5,
+    +document.getElementById("waterParam").value||2.5,
     totalNaEq,
     gOils
   );
 
-  // Additives / fragrance
-  const foType  = document.getElementById("foType").value;
-  const foMax   = fragranceCap(foType);
-  const fragPct = +(document.getElementById("fragPct").value || 0);
-  const slPct   = +(document.getElementById("slPct").value   || 0);
-  const saltPct = +(document.getElementById("saltPct").value || 0);
-  const sugarPct= +(document.getElementById("sugarPct").value|| 0);
-  const clayPct = +(document.getElementById("clayPct").value || 0);
-  const chelPct = +(document.getElementById("chelPct").value || 0);
+  const foType = document.getElementById("foType").value;
+  const foMax  = fragranceCap(foType);
+  const fragPct= +(document.getElementById("fragPct").value||0);
+  const slPct  = +(document.getElementById("slPct").value||0);
+  const saltPct= +(document.getElementById("saltPct").value||0);
+  const sugarPct=+(document.getElementById("sugarPct").value||0);
+  const clayPct= +(document.getElementById("clayPct").value||0);
+  const chelPct= +(document.getElementById("chelPct").value||0);
 
-  const fo   = addPct(gOils, fragPct);
-  const sl   = addPct(gOils, slPct);
-  const salt = addPct(gOils, saltPct);
-  const sugar= addPct(gOils, sugarPct);
-  const clay = addPct(gOils, clayPct);
-  const chel = addPct(gOils, chelPct);
+  const fo=addPct(gOils,fragPct), sl=addPct(gOils,slPct), salt=addPct(gOils,saltPct),
+        sugar=addPct(gOils,sugarPct), clay=addPct(gOils,clayPct), chel=addPct(gOils,chelPct);
+  const milk = water*((+document.getElementById("milkPct").value||0)/100);
 
-  const milk = water * ((+document.getElementById("milkPct").value || 0) / 100);
+  const batch = gOils + (na+ko) + water + fo + sl + salt + sugar + clay + chel;
 
-  // Totals
-  const batch = gOils + (na + ko) + water + fo + sl + salt + sugar + clay + chel;
+  const pot = +document.getElementById("potMl").value||0; const safeMin=pot*0.60, safeMax=pot*0.75;
 
-  // Pot capacity
-  const pot = +document.getElementById("potMl").value || 0;
-  const safeMin = pot * 0.60, safeMax = pot * 0.75;
-
-  // Results table
   document.getElementById("resTable").innerHTML = `
     <tr><th>NaOH (solid)</th><td>${na.toFixed(2)} g (${oz(na).toFixed(2)} oz)</td></tr>
     <tr><th>KOH (flakes)</th><td>${ko.toFixed(2)} g (${oz(ko).toFixed(2)} oz)</td></tr>
@@ -564,71 +560,60 @@ function calculate(){
     <tr><th>Clay</th><td>${clay.toFixed(2)} g (${clayPct}%)</td></tr>
     <tr><th>EDTA/Citrate</th><td>${chel.toFixed(2)} g (${chelPct}%)</td></tr>
     <tr><th><b>Total batch weight</b></th><td><b>${batch.toFixed(1)} g</b> (${oz(batch).toFixed(2)} oz)</td></tr>
-    ${pot ? `<tr><th>Recommended pot fill (60–75%)</th><td>${safeMin.toFixed(0)}–${safeMax.toFixed(0)} g</td></tr>` : ``}
+    ${pot?`<tr><th>Recommended pot fill (60–75%)</th><td>${safeMin.toFixed(0)}–${safeMax.toFixed(0)} g</td></tr>`:''}
   `;
 
-  // Safety badges
   const conc = concFrom(totalNaEq, water);
-  const caps = [];
-  if (conc < 25)       caps.push(badge("warn",  `Lye conc ${conc.toFixed(1)}% (dilute → slow trace)`));
-  else if (conc <= 27.9) caps.push(badge("ok",  `Lye conc ${conc.toFixed(1)}% (on dilute side)`));
-  else if (conc <= 33) caps.push(badge("ok",    `Lye conc ${conc.toFixed(1)}% sweet spot`));
-  else if (conc <= 38) caps.push(badge("warn",  `Lye conc ${conc.toFixed(1)}% (strong → faster trace)`));
-  else                 caps.push(badge("danger",`Lye conc ${conc.toFixed(1)}% (very strong)`));
+  const caps=[];
+  if(conc<25) caps.push(badge("warn",`Lye conc ${conc.toFixed(1)}% (dilute → slow trace)`));
+  else if(conc<=27.9) caps.push(badge("ok",`Lye conc ${conc.toFixed(1)}% (on dilute side)`));
+  else if(conc<=33) caps.push(badge("ok",`Lye conc ${conc.toFixed(1)}% sweet spot`));
+  else if(conc<=38) caps.push(badge("warn",`Lye conc ${conc.toFixed(1)}% (strong → faster trace)`));
+  else caps.push(badge("danger",`Lye conc ${conc.toFixed(1)}% (very strong)`));
 
-  const wm = document.getElementById("waterMode").value;
-  const wp = +document.getElementById("waterParam").value || 2.5;
-  if (wm === "ratio" && (wp < 1.7 || wp > 3.0)) {
-    caps.push(badge("warn", `Water:lye ${wp} outside common range (1.7–3.0)`));
-  }
+  const wm=document.getElementById("waterMode").value, wp=+document.getElementById("waterParam").value||2.5;
+  if(wm==="ratio" && (wp<1.7||wp>3.0)) caps.push(badge("warn",`Water:lye ${wp} outside common range (1.7–3.0)`));
 
-  const foCapBadge = (fragPct > foMax)
-    ? badge("danger", `FO/EO ${fragPct}% > max ${foMax}% (${document.getElementById("foType").selectedOptions[0].text})`)
-    : (fragPct === 0 ? badge("ok", "FO/EO: 0 (unused)") : badge("ok", `FO/EO ${fragPct}% ≤ max ${foMax}%`));
+  const foCapBadge = (fragPct>foMax) ? badge("danger",`FO/EO ${fragPct}% > max ${foMax}% (${ document.getElementById("foType").selectedOptions[0].text })`)
+                                      : (fragPct===0 ? badge("ok","FO/EO: 0 (unused)") : badge("ok",`FO/EO ${fragPct}% ≤ max ${foMax}%`));
   caps.push(foCapBadge);
 
-  if (sf < 2)  caps.push(badge("warn",   `Superfat low (${sf}%)`));
-  if (sf > 12) caps.push(badge("danger", `Superfat high (${sf}%)`));
+  if(sf<2) caps.push(badge("warn",`Superfat low (${sf}%)`));
+  if(sf>12) caps.push(badge("danger",`Superfat high (${sf}%)`));
 
-  if (pot){
-    if (batch > safeMax)       caps.push(badge("danger","Exceeds ~75% pot capacity (overflow risk)"));
-    else if (batch >= safeMin) caps.push(badge("ok","Capacity: within safe headroom"));
+  if(pot){
+    if(batch>safeMax) caps.push(badge("danger","Exceeds ~75% pot capacity (overflow risk)"));
+    else if(batch>=safeMin) caps.push(badge("ok","Capacity: within safe headroom"));
   }
-  document.getElementById("safetyBadges").innerHTML = caps.join(" ");
+  document.getElementById("safetyBadges").innerHTML=caps.join(" ");
 
-  // Additive range badges
-  const spec = additivesSpec;
+  const spec=additivesSpec;
   document.getElementById("additiveBadges").innerHTML =
     rangeBadge(fragPct, 0, foMax, "FO/EO")+
-    rangeBadge(+document.getElementById("slPct").value   || 0, spec.sl.min,   spec.sl.max,   "Sodium Lactate")+
-    rangeBadge(+document.getElementById("saltPct").value || 0, spec.salt.min, spec.salt.max, "Salt")+
-    rangeBadge(+document.getElementById("sugarPct").value|| 0, spec.sugar.min,spec.sugar.max,"Sugar")+
-    rangeBadge(+document.getElementById("clayPct").value || 0, spec.clay.min, spec.clay.max, "Clay")+
-    rangeBadge(+document.getElementById("chelPct").value || 0, spec.chel.min, spec.chel.max, "Chelator");
+    rangeBadge(+document.getElementById("slPct").value||0, spec.sl.min, spec.sl.max, "Sodium Lactate")+
+    rangeBadge(+document.getElementById("saltPct").value||0, spec.salt.min, spec.salt.max, "Salt")+
+    rangeBadge(+document.getElementById("sugarPct").value||0, spec.sugar.min, spec.sugar.max, "Sugar")+
+    rangeBadge(+document.getElementById("clayPct").value||0, spec.clay.min, spec.clay.max, "Clay")+
+    rangeBadge(+document.getElementById("chelPct").value||0, spec.chel.min, spec.chel.max, "Chelator");
 
-  // FO tip
   document.getElementById("foNote").textContent = FO_RULES[foType]?.tip || "";
-
-  // For costing tab
   renderCostTable(rows, {fo});
   window._last = {na,ko,water,fo,batch,rows};
 }
-</script>
-
 
 /* ========= LYE-LIMITED ========= */
 function calcLyeLimited(){
-  const naAvail = +$("#availLye").value||0;
-  const sf = +$("#sfLL").value||5;
-  const ratio = +$("#ratioLL").value||2.5;
-  const plan = profilePercents($("#profileLL").value);
+  const naAvail = +document.getElementById("availLye").value||0;
+  const sf = +document.getElementById("sfLL").value||5;
+  const ratio = +document.getElementById("ratioLL").value||2.5;
+  const plan = profilePercents(document.getElementById("profileLL").value);
   const SAPmix = sum(plan.map(([n,p])=> (p/100)*(SAP_NaOH[n]||0)));
   const oilsForNa = (naAvail) / ((1 - sf/100) * SAPmix);
   const fo = oilsForNa*0.03;
   const water = naAvail*ratio;
   const rows = plan.map(([n,p])=> [n, oilsForNa*(p/100)]);
   const batch = oilsForNa + naAvail + water + fo;
-  $("#llRes").innerHTML = `
+  document.getElementById("llRes").innerHTML = `
     <tr><th>Total oils</th><td>${oilsForNa.toFixed(1)} g</td></tr>
     ${rows.map(([n,g])=>`<tr><th>&nbsp;&nbsp;• ${n}</th><td>${g.toFixed(1)} g</td></tr>`).join('')}
     <tr><th>NaOH</th><td>${naAvail.toFixed(1)} g</td></tr>
@@ -638,51 +623,51 @@ function calcLyeLimited(){
   `;
 }
 
-/* ========= SAVE/LOAD / EXPORT / INSTALL ========= */
+/* ========= SAVE/LOAD / EXPORT ========= */
 const KEY="BelLei_Recipes";
 function collectInputs(){
   return {
-    oils:oilsAsGrams(), target:parseByUnit($("#targetOils").value||0), profile:$("#profile").value, percentMode,
-    lyeType:$("#lyeType").value, lyePurity:+$("#lyePurity").value||100, kohPurity:+$("#kohPurity").value||90, dualPct:+$("#dualPct").value||90,
-    sf:+$("#superfat").value||0, waterMode:$("#waterMode").value, waterParam:+$("#waterParam").value||2.5,
-    milkPct:+$("#milkPct").value||0, potMl:+$("#potMl").value||0,
-    adds:{fo:+$("#fragPct").value||0, sl:+$("#slPct").value||0, salt:+$("#saltPct").value||0, sugar:+$("#sugarPct").value||0, clay:+$("#clayPct").value||0, chel:+$("#chelPct").value||0},
-    foType:$("#foType").value
+    oils:oilsAsGrams(), target:parseByUnit(document.getElementById("targetOils").value||0), profile:document.getElementById("profile").value, percentMode,
+    lyeType:document.getElementById("lyeType").value, lyePurity:+document.getElementById("lyePurity").value||100, kohPurity:+document.getElementById("kohPurity").value||90, dualPct:+document.getElementById("dualPct").value||90,
+    sf:+document.getElementById("superfat").value||0, waterMode:document.getElementById("waterMode").value, waterParam:+document.getElementById("waterParam").value||2.5,
+    milkPct:+document.getElementById("milkPct").value||0, potMl:+document.getElementById("potMl").value||0,
+    adds:{fo:+document.getElementById("fragPct").value||0, sl:+document.getElementById("slPct").value||0, salt:+document.getElementById("saltPct").value||0, sugar:+document.getElementById("sugarPct").value||0, clay:+document.getElementById("clayPct").value||0, chel:+document.getElementById("chelPct").value||0},
+    foType:document.getElementById("foType").value
   };
 }
 function applyInputs(d){
-  $("#targetOils").value = useOz ? oz(d.target||1000).toFixed(2) : (d.target||1000);
-  $("#profile").value=d.profile||"PF45-30-15-10"; percentMode=!!d.percentMode; $("#pctBtn").textContent=`Percent mode: ${percentMode?'On':'Off'}`;
-  $("#lyeType").value=d.lyeType||"NaOH"; $("#lyePurity").value=d.lyePurity||100; $("#kohPurity").value=d.kohPurity||90; $("#dualPct").value=d.dualPct||90;
-  $("#superfat").value=d.sf||5; $("#waterMode").value=d.waterMode||"ratio"; $("#waterParam").value=d.waterParam||2.5;
-  $("#milkPct").value=d.milkPct||0; $("#potMl").value=d.potMl||0; $("#foType").value=d.foType||"FO";
-  $("#fragPct").value=d.adds?.fo??3; $("#slPct").value=d.adds?.sl??0; $("#saltPct").value=d.adds?.salt??0; $("#sugarPct").value=d.adds?.sugar??0; $("#clayPct").value=d.adds?.clay??0; $("#chelPct").value=d.adds?.chel??0;
-  $("#oilBody").innerHTML="";
+  document.getElementById("targetOils").value = useOz ? oz(d.target||1000).toFixed(2) : (d.target||1000);
+  document.getElementById("profile").value=d.profile||"PF45-30-15-10"; percentMode=!!d.percentMode; document.getElementById("pctBtn").textContent=`Percent mode: ${percentMode?'On':'Off'}`;
+  document.getElementById("lyeType").value=d.lyeType||"NaOH"; document.getElementById("lyePurity").value=d.lyePurity||100; document.getElementById("kohPurity").value=d.kohPurity||90; document.getElementById("dualPct").value=d.dualPct||90;
+  document.getElementById("superfat").value=d.sf||5; document.getElementById("waterMode").value=d.waterMode||"ratio"; document.getElementById("waterParam").value=d.waterParam||2.5;
+  document.getElementById("milkPct").value=d.milkPct||0; document.getElementById("potMl").value=d.potMl||0; document.getElementById("foType").value=d.foType||"FO";
+  document.getElementById("fragPct").value=d.adds?.fo??3; document.getElementById("slPct").value=d.adds?.sl??0; document.getElementById("saltPct").value=d.adds?.salt??0; document.getElementById("sugarPct").value=d.adds?.sugar??0; document.getElementById("clayPct").value=d.adds?.clay??0; document.getElementById("chelPct").value=d.adds?.chel??0;
+  document.getElementById("oilBody").innerHTML="";
   if(percentMode){
     const tot = sum((d.oils||defaults.oils).map(r=>r[1]||0))||1;
     (d.oils||defaults.oils).forEach(([n,g])=> addOilRow(n, (g/tot*100).toFixed(2)) );
-    $("#wtHdr").textContent="Percent (%)";
+    document.getElementById("wtHdr").textContent="Percent (%)";
   }else{
     (d.oils||defaults.oils).forEach(([n,g])=> addOilRow(n, g) );
-    $("#wtHdr").textContent=`Weight (${useOz?'oz':'g'})`;
+    document.getElementById("wtHdr").textContent=`Weight (${useOz?'oz':'g'})`;
   }
 }
 function saveRecipe(){
-  const name=prompt("Recipe name to save:", $("#recName").value||"").trim(); if(!name) return;
+  const name=prompt("Recipe name to save:", document.getElementById("recName").value||"").trim(); if(!name) return;
   const all=JSON.parse(localStorage.getItem(KEY)||"{}"); all[name]=collectInputs();
-  localStorage.setItem(KEY, JSON.stringify(all)); $("#recName").value=name; alert("Saved!");
+  localStorage.setItem(KEY, JSON.stringify(all)); document.getElementById("recName").value=name; alert("Saved!");
 }
 function loadRecipe(){
-  const name=prompt("Load which recipe name?", $("#recName").value||"").trim(); if(!name) return;
+  const name=prompt("Load which recipe name?", document.getElementById("recName").value||"").trim(); if(!name) return;
   const all=JSON.parse(localStorage.getItem(KEY)||"{}"); const d=all[name]; if(!d) return alert("Not found.");
   applyInputs(d); calculate();
 }
 function listRecipes(){
   const all=JSON.parse(localStorage.getItem(KEY)||"{}"); const list=Object.keys(all);
-  $("#saveList").innerHTML = list.length? list.map(n=>`<div class="tag">${n}</div>`).join('') : `<div class="note">No saved recipes yet.</div>`;
+  document.getElementById("saveList").innerHTML = list.length? list.map(n=>`<div class="tag">${n}</div>`).join('') : `<div class="note">No saved recipes yet.</div>`;
 }
 function deleteRecipe(){
-  const name=prompt("Delete which recipe name?", $("#recName").value||"").trim(); if(!name) return;
+  const name=prompt("Delete which recipe name?", document.getElementById("recName").value||"").trim(); if(!name) return;
   const all=JSON.parse(localStorage.getItem(KEY)||"{}"); delete all[name]; localStorage.setItem(KEY, JSON.stringify(all)); listRecipes(); alert("Deleted (if it existed).");
 }
 function exportJSON(){
@@ -699,7 +684,6 @@ async function maybeRegisterSW(){
     const res = await fetch(swURL, {method:'HEAD', cache:'no-store'});
     if(res && res.ok){
       await navigator.serviceWorker.register('./sw.js').catch(()=>{});
-      // show install CTA when available
       document.getElementById('installBtn')?.classList.remove('hide');
       document.getElementById('installLabel').textContent = "Install App (available)";
     }else{
@@ -710,7 +694,7 @@ async function maybeRegisterSW(){
   }
 }
 
-/* ========= TABS ========= */
+/* ========= TABS & EVENTS ========= */
 document.querySelectorAll('.tab').forEach(t=>{
   t.addEventListener('click', ()=>{
     document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
@@ -724,7 +708,6 @@ document.querySelectorAll('.tab').forEach(t=>{
   });
 });
 
-/* ========= LIVE HOOKS ========= */
 const liveUpdate = debounce(()=>{ updateOilTotals(); calculate(); }, 120);
 document.getElementById('oilBody').addEventListener('input',  e=>{ if(e.target.matches('input,select')) liveUpdate(); });
 document.getElementById('oilBody').addEventListener('change', e=>{ if(e.target.matches('input,select')) liveUpdate(); });
@@ -740,7 +723,6 @@ document.getElementById('unitToggle').addEventListener('click', (e)=>{
   rows.forEach(([n,g])=> addOilRow(n,g)); updateOilTotals(); calculate();
 });
 
-/* NEW: Wire Lye-Limited button */
 document.getElementById('llBtn').addEventListener('click', calcLyeLimited);
 
 ["lyeType","lyePurity","kohPurity","dualPct","superfat","waterMode","waterParam","milkPct","potMl","moldPreset",
@@ -784,7 +766,7 @@ document.getElementById('waterMode').addEventListener('change', ()=>{
   document.getElementById('waterParamLbl').textContent = map[document.getElementById('waterMode').value]||"Water";
 });
 
-/* INSTALL BUTTON (FIXED: use the same _deferredPrompt var) */
+/* INSTALL BUTTON */
 let _deferredPrompt=null;
 window.addEventListener('beforeinstallprompt', (e)=>{
   e.preventDefault(); _deferredPrompt=e;
@@ -801,9 +783,59 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   document.getElementById('oilBody').innerHTML=""; defaults.oils.forEach(o=> addOilRow(...o));
   document.getElementById('potMl').value=defaults.potMl;
   calculate();
-  // Conditional SW registration to avoid 404 error
   await maybeRegisterSW();
 });
+
+/* ========= SELF-TESTS (optional; run with ?dev=1) ========= */
+function almostEqual(a,b,t=1e-2){ return Math.abs(a-b) <= t; }
+function runSelfTests(){
+  const out=[]; let pass=0, total=0;
+  function test(name, fn){
+    total++;
+    try{
+      const ok = !!fn();
+      if(ok){ pass++; out.push(`✅ ${name}`); } else { out.push(`❌ ${name}`); }
+    }catch(e){ out.push(`💥 ${name} — threw: ${e.message||e}`); }
+  }
+  const lp = document.getElementById("lyePurity"), kp = document.getElementById("kohPurity");
+  const origLP = lp.value, origKP = kp.value; lp.value = "100"; kp.value = "100";
+
+  test("NaOH for 1000 g Olive @ 0% SF = 134 g", ()=>{
+    const rows=[["Olive Oil (pure)",1000]];
+    const got = calcLyeFromOils(rows, 0, "NaOH").na;
+    return almostEqual(got, 134.0, 1e-2);
+  });
+  test("NaOH for 1000 g Olive @ 5% SF ≈ 127.3 g", ()=>{
+    const rows=[["Olive Oil (pure)",1000]];
+    const got = calcLyeFromOils(rows, 5, "NaOH").na;
+    return almostEqual(got, 127.3, 1e-2);
+  });
+  test("Water ratio 2.5×NaOH (100→250)", ()=>{
+    const got = waterFromMode("ratio", 2.5, 100, 0);
+    return almostEqual(got, 250, 1e-9);
+  });
+  test("Lye conc 100/(100+150)=40%", ()=>{
+    return almostEqual(concFrom(100,150), 40, 1e-9);
+  });
+  test("Dual-lye 80/20 split", ()=>{
+    document.getElementById("dualPct").value="80";
+    const rows=[["Olive Oil (pure)",1000]]; const baseNa=134;
+    const {na,ko} = calcLyeFromOils(rows, 0, "dual");
+    const expNa = baseNa*0.8, expKo= baseNa*0.2*KOH_FACTOR;
+    return almostEqual(na,expNa,1e-2) && almostEqual(ko,expKo,1e-2);
+  });
+  test("FO cap FO=4.5%", ()=> almostEqual(fragranceCap("FO"),4.5,1e-9));
+
+  lp.value = origLP; kp.value = origKP;
+
+  const summary = `Self-tests: ${pass}/${total} passed`;
+  console.info(summary); out.forEach(l=>console.info(l));
+  const k=document.createElement("div"); k.className="kpi"; k.innerHTML=`<div>${summary}</div>`;
+  const grid=document.querySelector("#results .grid"); if(grid) grid.prepend(k);
+}
+(function(){ try{ const u=new URL(location.href); if(u.searchParams.get("dev")==="1"){ runSelfTests(); } }catch(_){} })();
 </script>
 </body>
 </html>
+
+  
