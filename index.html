@@ -503,37 +503,60 @@ function calcCost(){
 function fragranceCap(type){ return FO_RULES[type]?.max ?? 4.5; }
 function concFrom(lye, water){ const conc = lye/(lye+water)*100; return isFinite(conc)?conc:0; }
 
+<script>
+// --- replace your existing calculate() with this ---
 function calculate(){
   const rows = oilsAsGrams();
   const gOils = sum(rows.map(([_,g])=>g||0));
-  const sf = +$("#superfat").value||0;
-  const type=$("#lyeType").value;
-  const {na,ko} = calcLyeFromOils(rows,sf,type);
-  const totalNaEq = na + (ko/KOH_FACTOR);
-  const water = waterFromMode($("#waterMode").value, +$("#waterParam").value||2.5, totalNaEq, gOils);
 
-  const foType = $("#foType").value;
-  const foMax  = fragranceCap(foType);
-  const fragPct= +($("#fragPct").value||0);
-  const slPct  = +($("#slPct").value||0);
-  const saltPct= +($("#saltPct").value||0);
-  const sugarPct=+($("#sugarPct").value||0);
-  const clayPct= +($("#clayPct").value||0);
-  const chelPct= +($("#chelPct").value||0);
+  // Get key inputs once
+  const sf = +document.getElementById("superfat").value || 0;
+  const type = document.getElementById("lyeType").value;
 
-  const fo=addPct(gOils,fragPct), sl=addPct(gOils,slPct), salt=addPct(gOils,saltPct),
-        sugar=addPct(gOils,sugarPct), clay=addPct(gOils,clayPct), chel=addPct(gOils,chelPct);
-  const milk = water*((+$("#milkPct").value||0)/100);
+  // Lye calc
+  const {na,ko} = calcLyeFromOils(rows, sf, type);
+  const totalNaEq = na + (ko / KOH_FACTOR);
 
-  const batch = gOils + (na+ko) + water + fo + sl + salt + sugar + clay + chel;
+  // Water selection
+  const water = waterFromMode(
+    document.getElementById("waterMode").value,
+    +document.getElementById("waterParam").value || 2.5,
+    totalNaEq,
+    gOils
+  );
 
-  const pot = +$("#potMl").value||0; const safeMin=pot*0.60, safeMax=pot*0.75;
+  // Additives / fragrance
+  const foType  = document.getElementById("foType").value;
+  const foMax   = fragranceCap(foType);
+  const fragPct = +(document.getElementById("fragPct").value || 0);
+  const slPct   = +(document.getElementById("slPct").value   || 0);
+  const saltPct = +(document.getElementById("saltPct").value || 0);
+  const sugarPct= +(document.getElementById("sugarPct").value|| 0);
+  const clayPct = +(document.getElementById("clayPct").value || 0);
+  const chelPct = +(document.getElementById("chelPct").value || 0);
 
-  $("#resTable").innerHTML = `
+  const fo   = addPct(gOils, fragPct);
+  const sl   = addPct(gOils, slPct);
+  const salt = addPct(gOils, saltPct);
+  const sugar= addPct(gOils, sugarPct);
+  const clay = addPct(gOils, clayPct);
+  const chel = addPct(gOils, chelPct);
+
+  const milk = water * ((+document.getElementById("milkPct").value || 0) / 100);
+
+  // Totals
+  const batch = gOils + (na + ko) + water + fo + sl + salt + sugar + clay + chel;
+
+  // Pot capacity
+  const pot = +document.getElementById("potMl").value || 0;
+  const safeMin = pot * 0.60, safeMax = pot * 0.75;
+
+  // Results table
+  document.getElementById("resTable").innerHTML = `
     <tr><th>NaOH (solid)</th><td>${na.toFixed(2)} g (${oz(na).toFixed(2)} oz)</td></tr>
     <tr><th>KOH (flakes)</th><td>${ko.toFixed(2)} g (${oz(ko).toFixed(2)} oz)</td></tr>
     <tr><th>Water (total)</th><td>${water.toFixed(2)} g (${oz(water).toFixed(2)} oz)</td></tr>
-    <tr><th>Milk portion</th><td>${milk.toFixed(2)} g (${(+$("#milkPct").value||0)}%)</td></tr>
+    <tr><th>Milk portion</th><td>${milk.toFixed(2)} g (${(+document.getElementById("milkPct").value||0)}%)</td></tr>
     <tr><th>Fragrance / EO</th><td>${fo.toFixed(2)} g (${fragPct}%)</td></tr>
     <tr><th>Sodium Lactate</th><td>${sl.toFixed(2)} g (${slPct}%)</td></tr>
     <tr><th>Salt</th><td>${salt.toFixed(2)} g (${saltPct}%)</td></tr>
@@ -541,47 +564,57 @@ function calculate(){
     <tr><th>Clay</th><td>${clay.toFixed(2)} g (${clayPct}%)</td></tr>
     <tr><th>EDTA/Citrate</th><td>${chel.toFixed(2)} g (${chelPct}%)</td></tr>
     <tr><th><b>Total batch weight</b></th><td><b>${batch.toFixed(1)} g</b> (${oz(batch).toFixed(2)} oz)</td></tr>
-    ${pot?`<tr><th>Recommended pot fill (60–75%)</th><td>${safeMin.toFixed(0)}–${safeMax.toFixed(0)} g</td></tr>`:''}
+    ${pot ? `<tr><th>Recommended pot fill (60–75%)</th><td>${safeMin.toFixed(0)}–${safeMax.toFixed(0)} g</td></tr>` : ``}
   `;
 
+  // Safety badges
   const conc = concFrom(totalNaEq, water);
-  const caps=[];
-  if(conc<25) caps.push(badge("warn",`Lye conc ${conc.toFixed(1)}% (dilute → slow trace)`));
-  else if(conc<=27.9) caps.push(badge("ok",`Lye conc ${conc.toFixed(1)}% (on dilute side)`));
-  else if(conc<=33) caps.push(badge("ok",`Lye conc ${conc.toFixed(1)}% sweet spot`));
-  else if(conc<=38) caps.push(badge("warn",`Lye conc ${conc.toFixed(1)}% (strong → faster trace)`));
-  else caps.push(badge("danger",`Lye conc ${conc.toFixed(1)}% (very strong)`));
+  const caps = [];
+  if (conc < 25)       caps.push(badge("warn",  `Lye conc ${conc.toFixed(1)}% (dilute → slow trace)`));
+  else if (conc <= 27.9) caps.push(badge("ok",  `Lye conc ${conc.toFixed(1)}% (on dilute side)`));
+  else if (conc <= 33) caps.push(badge("ok",    `Lye conc ${conc.toFixed(1)}% sweet spot`));
+  else if (conc <= 38) caps.push(badge("warn",  `Lye conc ${conc.toFixed(1)}% (strong → faster trace)`));
+  else                 caps.push(badge("danger",`Lye conc ${conc.toFixed(1)}% (very strong)`));
 
-  const wm=$("#waterMode").value, wp=+$("#waterParam").value||2.5;
-  if(wm==="ratio" && (wp<1.7||wp>3.0)) caps.push(badge("warn",`Water:lye ${wp} outside common range (1.7–3.0)`));
+  const wm = document.getElementById("waterMode").value;
+  const wp = +document.getElementById("waterParam").value || 2.5;
+  if (wm === "ratio" && (wp < 1.7 || wp > 3.0)) {
+    caps.push(badge("warn", `Water:lye ${wp} outside common range (1.7–3.0)`));
+  }
 
-  const foCapBadge = (fragPct>foMax) ? badge("danger",`FO/EO ${fragPct}% > max ${foMax}% (${ $("#foType").selectedOptions[0].text })`)
-                                      : (fragPct===0 ? badge("ok","FO/EO: 0 (unused)") : badge("ok",`FO/EO ${fragPct}% ≤ max ${foMax}%`));
+  const foCapBadge = (fragPct > foMax)
+    ? badge("danger", `FO/EO ${fragPct}% > max ${foMax}% (${document.getElementById("foType").selectedOptions[0].text})`)
+    : (fragPct === 0 ? badge("ok", "FO/EO: 0 (unused)") : badge("ok", `FO/EO ${fragPct}% ≤ max ${foMax}%`));
   caps.push(foCapBadge);
 
-  const sf = +$("#superfat").value||0;
-  if(sf<2) caps.push(badge("warn",`Superfat low (${sf}%)`));
-  if(sf>12) caps.push(badge("danger",`Superfat high (${sf}%)`));
+  if (sf < 2)  caps.push(badge("warn",   `Superfat low (${sf}%)`));
+  if (sf > 12) caps.push(badge("danger", `Superfat high (${sf}%)`));
 
-  if(pot){
-    if(batch>safeMax) caps.push(badge("danger","Exceeds ~75% pot capacity (overflow risk)"));
-    else if(batch>=safeMin) caps.push(badge("ok","Capacity: within safe headroom"));
+  if (pot){
+    if (batch > safeMax)       caps.push(badge("danger","Exceeds ~75% pot capacity (overflow risk)"));
+    else if (batch >= safeMin) caps.push(badge("ok","Capacity: within safe headroom"));
   }
-  $("#safetyBadges").innerHTML=caps.join(" ");
+  document.getElementById("safetyBadges").innerHTML = caps.join(" ");
 
-  const spec=additivesSpec;
-  $("#additiveBadges").innerHTML =
+  // Additive range badges
+  const spec = additivesSpec;
+  document.getElementById("additiveBadges").innerHTML =
     rangeBadge(fragPct, 0, foMax, "FO/EO")+
-    rangeBadge(+$("#slPct").value||0, spec.sl.min, spec.sl.max, "Sodium Lactate")+
-    rangeBadge(+$("#saltPct").value||0, spec.salt.min, spec.salt.max, "Salt")+
-    rangeBadge(+$("#sugarPct").value||0, spec.sugar.min, spec.sugar.max, "Sugar")+
-    rangeBadge(+$("#clayPct").value||0, spec.clay.min, spec.clay.max, "Clay")+
-    rangeBadge(+$("#chelPct").value||0, spec.chel.min, spec.chel.max, "Chelator");
+    rangeBadge(+document.getElementById("slPct").value   || 0, spec.sl.min,   spec.sl.max,   "Sodium Lactate")+
+    rangeBadge(+document.getElementById("saltPct").value || 0, spec.salt.min, spec.salt.max, "Salt")+
+    rangeBadge(+document.getElementById("sugarPct").value|| 0, spec.sugar.min,spec.sugar.max,"Sugar")+
+    rangeBadge(+document.getElementById("clayPct").value || 0, spec.clay.min, spec.clay.max, "Clay")+
+    rangeBadge(+document.getElementById("chelPct").value || 0, spec.chel.min, spec.chel.max, "Chelator");
 
-  $("#foNote").textContent = FO_RULES[foType]?.tip || "";
+  // FO tip
+  document.getElementById("foNote").textContent = FO_RULES[foType]?.tip || "";
+
+  // For costing tab
   renderCostTable(rows, {fo});
   window._last = {na,ko,water,fo,batch,rows};
 }
+</script>
+
 
 /* ========= LYE-LIMITED ========= */
 function calcLyeLimited(){
