@@ -214,7 +214,26 @@ body.show-advanced #beginnerCard{display:none}
   <!-- CALC -->
   <section class="card grid only-advanced" id="calc" role="tabpanel" aria-labelledby="calc-tab">
     <div class="section-title">
-      <h2 style="margin:0">Calculator</h2>
+      <!-- Add this just under the section-title in #calc -->
+<div class="row" id="productRow">
+  <div>
+    <label for="productType">Product</label>
+    <select id="productType">
+    <span class="tag" id="modeTag">Bar Soap</span>
+      <option value="liquid">Liquid Body Soap (KOH)</option>
+      <option value="dish">Dish Soap (KOH)</option>
+      <option value="laundry">Laundry Soap (NaOH)</option>
+      <option value="lipbalm">Lip Balm (no lye)</option>
+      <option value="bodybutter">Body Butter (no lye)</option>
+      <option value="lotion">Body Lotion (no lye)</option>
+    </select>
+  </div>
+  <div>
+    <div class="note" id="productNote" style="margin-top:28px">
+      Bar Soap uses NaOH. Liquid/Dish use KOH. Non-lye items hide lye fields.
+    </div>
+  </div>
+</div><h2 style="margin:0">Calculator</h2>
       <span class="tag" id="modeTag">Advanced Mode</span>
     </div>
 
