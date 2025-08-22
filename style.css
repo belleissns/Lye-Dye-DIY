@@ -1,53 +1,55 @@
+/* ==== RESET & BASE ==== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 body {
   font-family: Arial, sans-serif;
   background: #fefdf9;
-  margin: 0;
-  padding: 0;
-  text-align: center;
-}
-
-header {
-  background: #f4dada;
-  padding: 1em;
-  border-bottom: 2px solid #ccc;
-}
-
-header h1 {
-  margin: 0;
-  font-size: 1.8em;
   color: #333;
+  text-align: center;
+  padding: 0;
 }
 
-.brand {
-  font-style: italic;
-  color: #666;
+/* ==== HEADER ==== */
+header.app-header {
+  background: #98273B;
+  color: #fff;
+  padding: 1rem;
+  border-bottom: 3px solid #751c2d;
 }
 
-.calculator {
-  margin: 2em auto;
-  padding: 1.5em;
-  max-width: 400px;
+header.app-header h1 {
+  font-size: 1.8rem;
+  margin-bottom: 0.2rem;
+}
+
+header.app-header .sub {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+/* ==== CONTAINER ==== */
+.container {
+  max-width: 800px;
+  margin: 1rem auto;
+  padding: 1rem;
+}
+
+/* ==== CARDS ==== */
+.card {
+  background: #fff;
   border: 1px solid #ccc;
   border-radius: 10px;
-  background: #fff;
+  padding: 1rem;
+  margin: 1rem 0;
+  text-align: left;
   position: relative;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
-.calculator::after {
-  content: "Bel Lei's Soaps N Stuffs";
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  font-size: 0.8em;
-  color: rgba(100,100,100,0.2);
-}
-
-input, select, button {
-  margin: 0.5em;
-  padding: 0.5em;
-}
-
-#results {
-  margin-top: 1em;
-  font-weight: bold;
-}
+.card-light {
+  background: #f9f9f9;
+  color: #
