@@ -1,7 +1,8 @@
 {
   "name": "Lye, Dye, and DIY — Bel Lei’s Soap Calculator",
-  "short_name": "Lye, Dye, & DIY",
-  "start_url": "./",
+  "short_name": "SoapCalc",
+  "description": "The ultimate beginner-to-pro soap calculator for soapmakers, lotion creators, and more!",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#fff8f8",
   "theme_color": "#98273B",
